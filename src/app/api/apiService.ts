@@ -6,9 +6,18 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? '' // Vercel API routes are relative to the same domain
   : 'http://localhost:3000';
 
+// Helper function to handle API responses
+const handleResponse = async (response: Response) => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+};
+
 export const api = {
   // Auth endpoints
-  register: async (userData) => {
+  register: async (userData: { name: string; email: string; password: string }) => {
     const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
@@ -16,10 +25,10 @@ export const api = {
       },
       body: JSON.stringify(userData),
     });
-    return response.json();
+    return handleResponse(response);
   },
 
-  login: async (credentials) => {
+  login: async (credentials: { email: string; password: string }) => {
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -27,32 +36,32 @@ export const api = {
       },
       body: JSON.stringify(credentials),
     });
-    return response.json();
+    return handleResponse(response);
   },
 
   // Book endpoints
   getBooks: async () => {
     const response = await fetch(`${API_BASE_URL}/api/books`);
-    return response.json();
+    return handleResponse(response);
   },
 
-  getBook: async (id) => {
+  getBook: async (id: string) => {
     const response = await fetch(`${API_BASE_URL}/api/books/${id}`);
-    return response.json();
+    return handleResponse(response);
   },
 
   // Library endpoints
-  getLibrary: async (token) => {
+  getLibrary: async (token: string) => {
     const response = await fetch(`${API_BASE_URL}/api/library`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
-    return response.json();
+    return handleResponse(response);
   },
 
   // Purchase endpoints
-  purchaseBook: async (bookId, token) => {
+  purchaseBook: async (bookId: string, token: string) => {
     const response = await fetch(`${API_BASE_URL}/api/purchase`, {
       method: 'POST',
       headers: {
@@ -61,11 +70,11 @@ export const api = {
       },
       body: JSON.stringify({ bookId }),
     });
-    return response.json();
+    return handleResponse(response);
   },
 
   // Reading progress endpoints (using Supabase directly)
-  getProgress: async (bookId) => {
+  getProgress: async (bookId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -86,7 +95,7 @@ export const api = {
     return data ? data.progress : 0;
   },
 
-  updateProgress: async (bookId, progress) => {
+  updateProgress: async (bookId: string, progress: number) => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {

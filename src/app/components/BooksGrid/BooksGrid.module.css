@@ -1,0 +1,98 @@
+.booksContainer {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.viewControls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.viewButton {
+  padding: 0.5rem 1rem;
+  background: var(--surface-light);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.viewButton:hover {
+  background: var(--primary);
+}
+
+.viewButton.active {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.sortControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortSelect {
+  background: var(--surface-light);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.booksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.booksGrid.listMode {
+  grid-template-columns: 1fr;
+}
+
+.booksGrid.listMode > div {
+  height: 200px;
+}
+
+.noBooks {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+.noBooks h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .viewControls {
+    justify-content: center;
+  }
+  
+  .sortControls {
+    justify-content: center;
+  }
+  
+  .booksGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}

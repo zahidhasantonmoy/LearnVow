@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
-import Navbar from "./components/Navbar";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-});
+import Navbar from "./components/Navbar/Navbar";
+import Footer from "./components/Footer/Footer";
 
 export const metadata: Metadata = {
-  title: "LearnVow - Ebook & Audiobook Platform",
-  description: "Discover and enjoy ebooks and audiobooks",
+  title: "LearnVow - Modern Ebook & Audiobook Platform",
+  description: "Discover and enjoy thousands of ebooks and audiobooks with a futuristic reading experience",
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
@@ -24,11 +18,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body>
         <Navbar />
         <main>
           {children}
         </main>
+        <Footer />
       </body>
     </html>
   );
