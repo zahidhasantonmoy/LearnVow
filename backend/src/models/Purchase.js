@@ -25,6 +25,7 @@ class Purchase {
           price: price
         }
       ])
+      .select()
       .single();
 
     if (error) {

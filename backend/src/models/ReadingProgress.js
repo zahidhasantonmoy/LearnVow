@@ -10,6 +10,10 @@ class ReadingProgress {
       .single();
 
     if (error) {
+      // If no record found, return 0
+      if (error.code === 'PGRST116') {
+        return 0;
+      }
       console.error('Error fetching reading progress:', error);
       return 0;
     }
@@ -24,9 +28,9 @@ class ReadingProgress {
       .select('id')
       .eq('user_id', userId)
       .eq('book_id', bookId)
-      .single();
+      .maybeSingle();
 
-    if (selectError && selectError.code !== 'PGRST116') {
+    if (selectError) {
       console.error('Error checking existing progress:', selectError);
       throw selectError;
     }

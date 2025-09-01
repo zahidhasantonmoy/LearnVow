@@ -1,7 +1,7 @@
 const supabase = require('../config/supabase');
 
 class Book {
-  constructor(id, title, author, category, type, price, cover, description, filePath) {
+  constructor(id, title, author, category, type, price, cover, description, file_path, created_at) {
     this.id = id;
     this.title = title;
     this.author = author;
@@ -10,7 +10,8 @@ class Book {
     this.price = price;
     this.cover = cover;
     this.description = description;
-    this.filePath = filePath;
+    this.file_path = file_path;
+    this.created_at = created_at;
   }
 
   static async findAll() {
@@ -32,7 +33,8 @@ class Book {
       book.price, 
       book.cover, 
       book.description,
-      book.file_path
+      book.file_path,
+      book.created_at
     ));
   }
 
@@ -58,7 +60,8 @@ class Book {
         data.price, 
         data.cover, 
         data.description,
-        data.file_path
+        data.file_path,
+        data.created_at
       );
     }
 

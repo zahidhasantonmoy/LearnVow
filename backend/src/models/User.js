@@ -1,27 +1,31 @@
 const supabase = require('../config/supabase');
 
 class User {
-  constructor(id, name, email, password) {
+  constructor(id, name, email, created_at) {
     this.id = id;
     this.name = name;
     this.email = email;
-    this.password = password;
+    this.created_at = created_at;
   }
 
-  static async findByEmail(email) {
+  // Note: We're not implementing create or findByEmail here
+  // because we'll use Supabase Auth for user management
+  // This model is kept for compatibility with existing code
+
+  static async findById(id) {
     const { data, error } = await supabase
       .from('users')
       .select('*')
-      .eq('email', email)
+      .eq('id', id)
       .single();
 
     if (error) {
-      console.error('Error finding user by email:', error);
+      console.error('Error finding user by ID:', error);
       return null;
     }
 
     if (data) {
-      return new User(data.id, data.name, data.email, data.password);
+      return new User(data.id, data.name, data.email, data.created_at);
     }
 
     return null;
@@ -33,10 +37,10 @@ class User {
       .insert([
         {
           name: userData.name,
-          email: userData.email,
-          password: userData.password
+          email: userData.email
         }
       ])
+      .select()
       .single();
 
     if (error) {
@@ -45,7 +49,7 @@ class User {
     }
 
     if (data) {
-      return new User(data.id, data.name, data.email, data.password);
+      return new User(data.id, data.name, data.email, data.created_at);
     }
 
     return null;
