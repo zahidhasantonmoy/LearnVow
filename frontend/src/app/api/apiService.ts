@@ -64,4 +64,15 @@ export const api = {
       },
       body: JSON.stringify({ progress }),
     }).then(res => res.json()),
+
+  // File access endpoints
+  generateSignedUrl: (filePath, token) => 
+    fetch(`${API_BASE_URL}/files/generate-signed-url`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ filePath }),
+    }).then(res => res.json()),
 };
