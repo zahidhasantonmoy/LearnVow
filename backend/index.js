@@ -17,8 +17,20 @@ const fileRoutes = require('./src/routes/fileRoutes');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://your-vercel-app.vercel.app', // Replace with your actual Vercel app URL
+    /\.vercel\.app$/, // Allow all Vercel deployments
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
@@ -31,10 +43,15 @@ app.use('/api/progress', readingProgressRoutes);
 app.use('/api/files', fileRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'LearnVow API is running!' });
+  res.json({ 
+    message: 'LearnVow API is running!',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Start server
 app.listen(PORT, () => {
   console.log(`LearnVow backend listening at http://localhost:${PORT}`);
 });
+
+module.exports = app;

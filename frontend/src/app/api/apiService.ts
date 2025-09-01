@@ -1,65 +1,55 @@
 // API service for connecting to backend and Supabase
 import { supabase } from '../utils/supabaseClient';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-vercel-url.vercel.app/api' // Update this when you deploy
-  : 'http://localhost:3001/api';
+// Determine backend URL based on environment
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 
+  (process.env.NODE_ENV === 'production' 
+    ? 'https://your-render-backend.onrender.com' // Update this with your actual backend URL
+    : 'http://localhost:3001');
+
+const API_BASE_URL = `${BACKEND_BASE_URL}/api`;
 
 export const api = {
   // Auth endpoints
   register: async (userData) => {
-    const { data, error } = await supabase.auth.signUp({
-      email: userData.email,
-      password: userData.password,
-      options: {
-        data: {
-          name: userData.name
-        }
-      }
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
     });
-    
-    return { data, error };
+    return response.json();
   },
 
   login: async (credentials) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
     });
-    
-    return { data, error };
-  },
-
-  logout: async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    return response.json();
   },
 
   getCurrentUser: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
+    const response = await fetch(`${API_BASE_URL}/auth/me`);
+    return response.json();
   },
 
   // Book endpoints
   getBooks: async () => {
-    const { data, error } = await supabase
-      .from('books')
-      .select('*');
-    
-    return { data, error };
+    const response = await fetch(`${API_BASE_URL}/books`);
+    return response.json();
   },
 
   getBook: async (id) => {
-    const { data, error } = await supabase
-      .from('books')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    return { data, error };
+    const response = await fetch(`${API_BASE_URL}/books/${id}`);
+    return response.json();
   },
 
-  // Library endpoints
+  // Library endpoints (using Supabase directly)
   getLibrary: async () => {
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -72,43 +62,31 @@ export const api = {
       user_uuid: user.id
     });
     
-    return { data, error };
+    if (error) throw error;
+    return data;
   },
 
-  // Purchase endpoints
+  // Purchase endpoints (using backend API)
   purchaseBook: async (bookId) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (!user) {
+    if (!session) {
       throw new Error('User not authenticated');
     }
     
-    // First get the book price
-    const { data: book, error: bookError } = await supabase
-      .from('books')
-      .select('price')
-      .eq('id', bookId)
-      .single();
-      
-    if (bookError) {
-      throw new Error('Book not found');
-    }
+    const response = await fetch(`${API_BASE_URL}/purchase`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ bookId }),
+    });
     
-    // Create purchase record
-    const { data, error } = await supabase
-      .from('purchases')
-      .insert([
-        {
-          user_id: user.id,
-          book_id: bookId,
-          price: book.price
-        }
-      ]);
-      
-    return { data, error };
+    return response.json();
   },
 
-  // Reading progress endpoints
+  // Reading progress endpoints (using Supabase directly)
   getProgress: async (bookId) => {
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -127,7 +105,7 @@ export const api = {
       throw error;
     }
     
-    return { data: data ? data.progress : 0, error };
+    return data ? data.progress : 0;
   },
 
   updateProgress: async (bookId, progress) => {
@@ -167,6 +145,7 @@ export const api = {
         ]));
     }
     
-    return { data, error };
+    if (error) throw error;
+    return data;
   }
 };
