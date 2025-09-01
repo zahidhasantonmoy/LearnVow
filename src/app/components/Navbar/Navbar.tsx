@@ -4,15 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiShoppingCart, FiUser, FiBook, FiHeadphones, FiSearch, FiLogOut } from 'react-icons/fi';
-import { apiClient } from '../../services/apiClient';
+import { FiMenu, FiX, FiShoppingCart, FiUser, FiBook, FiHeadphones, FiSearch } from 'react-icons/fi';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [cartItemsCount, setCartItemsCount] = useState(0);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -23,44 +20,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Check if user is authenticated
-        const userResult = await apiClient.getCurrentUser();
-        if (userResult.success) {
-          setUser(userResult.data);
-        }
-        
-        // Get cart items count
-        const cartResult = await apiClient.getCart();
-        if (cartResult.success) {
-          setCartItemsCount(cartResult.data.items?.length || 0);
-        }
-      } catch (error) {
-        console.error('Failed to fetch navbar data', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      const result = await apiClient.logout();
-      if (result.success) {
-        setUser(null);
-        setCartItemsCount(0);
-        // Redirect to home page
-        window.location.href = '/';
-      } else {
-        alert('Failed to logout: ' + result.message);
-      }
-    } catch (error: any) {
-      alert('An error occurred during logout: ' + error.message);
-    }
-  };
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -107,25 +66,12 @@ export default function Navbar() {
           
           <Link href="/cart" className={styles.cartButton}>
             <FiShoppingCart size={20} />
-            {cartItemsCount > 0 && (
-              <span className={styles.cartBadge}>{cartItemsCount}</span>
-            )}
+            <span className={styles.cartBadge}>0</span>
           </Link>
           
-          {user ? (
-            <div className={styles.userMenu}>
-              <Link href="/library" className={styles.userButton}>
-                <FiUser size={20} />
-              </Link>
-              <button className={styles.logoutButton} onClick={handleLogout}>
-                <FiLogOut size={20} />
-              </button>
-            </div>
-          ) : (
-            <Link href="/auth/login" className={styles.userButton}>
-              <FiUser size={20} />
-            </Link>
-          )}
+          <Link href="/auth/login" className={styles.userButton}>
+            <FiUser size={20} />
+          </Link>
           
           <button 
             className={styles.menuButton}
@@ -161,25 +107,12 @@ export default function Navbar() {
             <div className={styles.mobileActions}>
               <Link href="/cart" className={styles.mobileCart}>
                 <FiShoppingCart size={20} />
-                <span>Cart ({cartItemsCount})</span>
+                <span>Cart (0)</span>
               </Link>
-              {user ? (
-                <>
-                  <Link href="/library" className={styles.mobileUser}>
-                    <FiUser size={20} />
-                    <span>Library</span>
-                  </Link>
-                  <button className={styles.mobileLogout} onClick={handleLogout}>
-                    <FiLogOut size={20} />
-                    <span>Logout</span>
-                  </button>
-                </>
-              ) : (
-                <Link href="/auth/login" className={styles.mobileUser}>
-                  <FiUser size={20} />
-                  <span>Login</span>
-                </Link>
-              )}
+              <Link href="/auth/login" className={styles.mobileUser}>
+                <FiUser size={20} />
+                <span>Login</span>
+              </Link>
             </div>
           </motion.div>
         )}

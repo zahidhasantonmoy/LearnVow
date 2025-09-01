@@ -1,13 +1,12 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { apiClient } from '../../services/apiClient';
-import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiLogIn } from 'react-icons/fi';
 import styles from './auth.module.css';
 
 export default function Login() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,18 +18,21 @@ export default function Login() {
     setLoading(true);
     setError('');
     
+    // Simple validation
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      setLoading(false);
+      return;
+    }
+    
+    // Mock login process
     try {
-      const result = await apiClient.login({ email, password });
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      if (result.success) {
-        // Redirect to books page or dashboard
-        router.push('/library');
-        router.refresh();
-      } else {
-        setError(result.message || 'Login failed');
-      }
+      // Redirect to library on successful login
+      window.location.href = '/library';
     } catch (err: any) {
-      setError(err.message || 'An error occurred during login');
+      setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -38,26 +40,39 @@ export default function Login() {
 
   return (
     <div className={styles.authContainer}>
-      <div className={styles.authCard}>
+      <motion.div 
+        className={styles.authCard}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className={styles.authHeader}>
-          <h2>Welcome Back</h2>
-          <p>Sign in to your LearnVow account</p>
+          <div className={styles.logo}>
+            <FiUser size={32} />
+          </div>
+          <h1 className={styles.title}>Welcome Back</h1>
+          <p className={styles.subtitle}>Sign in to your LearnVow account</p>
         </div>
         
-        {error && <div className={styles.errorMessage}>{error}</div>}
+        {error && (
+          <div className={styles.errorMessage}>
+            {error}
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className={styles.authForm}>
           <div className={styles.inputGroup}>
             <label htmlFor="email">Email Address</label>
             <div className={styles.inputWrapper}>
-              <FiMail className={styles.inputIcon} />
+              <FiMail className={styles.inputIcon} size={20} />
               <input
                 type="email"
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                required
+                className={styles.input}
+                disabled={loading}
               />
             </div>
           </div>
@@ -65,46 +80,62 @@ export default function Login() {
           <div className={styles.inputGroup}>
             <label htmlFor="password">Password</label>
             <div className={styles.inputWrapper}>
-              <FiLock className={styles.inputIcon} />
+              <FiLock className={styles.inputIcon} size={20} />
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                required
+                className={styles.input}
+                disabled={loading}
               />
               <button
                 type="button"
                 className={styles.passwordToggle}
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
               >
                 {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
               </button>
             </div>
           </div>
           
-          <div className={styles.formOptions}>
-            <label className={styles.checkboxLabel}>
-              <input type="checkbox" />
-              <span>Remember me</span>
-            </label>
-            <a href="#" className={styles.forgotPassword}>Forgot password?</a>
+          <div className={styles.forgotPassword}>
+            <Link href="/auth/forgot-password" className={styles.forgotLink}>
+              Forgot password?
+            </Link>
           </div>
           
           <button 
             type="submit" 
-            className={styles.submitButton} 
+            className={styles.submitButton}
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? (
+              <>
+                <span className={styles.spinner}></span>
+                Signing In...
+              </>
+            ) : (
+              <>
+                <FiLogIn size={20} />
+                Sign In
+              </>
+            )}
           </button>
         </form>
         
         <div className={styles.authFooter}>
-          <p>Don't have an account? <a href="/auth/signup">Sign up</a></p>
+          <p>Don't have an account? <Link href="/auth/signup">Sign up</Link></p>
         </div>
-      </div>
+        
+        <div className={styles.demoCredentials}>
+          <p>Demo Credentials:</p>
+          <p>Email: demo@example.com</p>
+          <p>Password: demopassword</p>
+        </div>
+      </motion.div>
     </div>
   );
 }

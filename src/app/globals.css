@@ -1,19 +1,53 @@
 @import './themes/modern.css';
 
-@import './themes/modern.css';
-
 :root {
+  /* Color Scheme */
   --background: #0f172a;
   --foreground: #f1f5f9;
   --primary: #6366f1;
+  --primary-dark: #4f46e5;
   --secondary: #8b5cf6;
   --accent: #00ffff;
+  --surface: #1e293b;
+  --surface-light: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(2, 12, 30, 0.3);
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-neon: 0 0 10px var(--accent), 0 0 20px var(--accent);
 }
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Exo 2', sans-serif;
 }
 
 body {
@@ -59,20 +93,72 @@ img {
   background: var(--primary-dark);
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
+/* Utility classes */
+.text-center {
+  text-align: center;
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(30, 41, 59, 0.5);
+.text-primary {
+  color: var(--text-primary);
 }
 
-::-webkit-scrollbar-thumb {
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.bg-primary {
+  background: var(--primary);
+}
+
+.bg-secondary {
+  background: var(--secondary);
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
   background: linear-gradient(45deg, var(--primary), var(--secondary));
-  border-radius: 4px;
+  color: white;
+  box-shadow: var(--shadow-md);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-dark);
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg), var(--shadow-neon);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 2px solid var(--surface-light);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  transform: translateY(-3px);
+}
+
+/* Form elements */
+input, select, textarea {
+  font-family: 'Exo 2', sans-serif;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  :root {
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+  }
 }

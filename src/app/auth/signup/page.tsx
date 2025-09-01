@@ -1,45 +1,70 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { apiClient } from '../../services/apiClient';
-import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
 import styles from '../login/auth.module.css';
 
 export default function Signup() {
-  const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess(false);
     
-    if (password !== confirmPassword) {
-      setError("Passwords don't match");
+    // Validation
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError('Please fill in all fields');
       setLoading(false);
       return;
     }
     
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+    
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+    
+    // Mock signup process
     try {
-      const result = await apiClient.register({ name, email, password });
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      if (result.success) {
-        // Redirect to library page
-        router.push('/library');
-        router.refresh();
-      } else {
-        setError(result.message || 'Registration failed');
-      }
+      // Show success message
+      setSuccess(true);
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        window.location.href = '/auth/login';
+      }, 2000);
     } catch (err: any) {
-      setError(err.message || 'An error occurred during registration');
+      setError(err.message || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -47,26 +72,40 @@ export default function Signup() {
 
   return (
     <div className={styles.authContainer}>
-      <div className={styles.authCard}>
+      <motion.div 
+        className={styles.authCard}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className={styles.authHeader}>
-          <h2>Create Account</h2>
-          <p>Join LearnVow to start your reading journey</p>
+          <div className={styles.logo}>
+            <FiUser size={32} />
+          </div>
+          <h1 className={styles.title}>Create Account</h1>
+          <p className={styles.subtitle}>Join LearnVow to start your reading journey</p>
         </div>
         
-        {error && <div className={styles.errorMessage}>{error}</div>}
+        {(error || success) && (
+          <div className={`${styles.errorMessage} ${success ? styles.successMessage : ''}`}>
+            {success ? 'Account created successfully! Redirecting to login...' : error}
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className={styles.authForm}>
           <div className={styles.inputGroup}>
             <label htmlFor="name">Full Name</label>
             <div className={styles.inputWrapper}>
-              <FiUser className={styles.inputIcon} />
+              <FiUser className={styles.inputIcon} size={20} />
               <input
                 type="text"
                 id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 placeholder="Enter your full name"
-                required
+                className={styles.input}
+                disabled={loading || success}
               />
             </div>
           </div>
@@ -74,14 +113,16 @@ export default function Signup() {
           <div className={styles.inputGroup}>
             <label htmlFor="email">Email Address</label>
             <div className={styles.inputWrapper}>
-              <FiMail className={styles.inputIcon} />
+              <FiMail className={styles.inputIcon} size={20} />
               <input
                 type="email"
                 id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Enter your email"
-                required
+                className={styles.input}
+                disabled={loading || success}
               />
             </div>
           </div>
@@ -89,19 +130,22 @@ export default function Signup() {
           <div className={styles.inputGroup}>
             <label htmlFor="password">Password</label>
             <div className={styles.inputWrapper}>
-              <FiLock className={styles.inputIcon} />
+              <FiLock className={styles.inputIcon} size={20} />
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="Create a password"
-                required
+                className={styles.input}
+                disabled={loading || success}
               />
               <button
                 type="button"
                 className={styles.passwordToggle}
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={loading || success}
               >
                 {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
               </button>
@@ -111,45 +155,51 @@ export default function Signup() {
           <div className={styles.inputGroup}>
             <label htmlFor="confirmPassword">Confirm Password</label>
             <div className={styles.inputWrapper}>
-              <FiLock className={styles.inputIcon} />
+              <FiLock className={styles.inputIcon} size={20} />
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
                 placeholder="Confirm your password"
-                required
+                className={styles.input}
+                disabled={loading || success}
               />
               <button
                 type="button"
                 className={styles.passwordToggle}
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                disabled={loading || success}
               >
                 {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
               </button>
             </div>
           </div>
           
-          <div className={styles.formOptions}>
-            <label className={styles.checkboxLabel}>
-              <input type="checkbox" required />
-              <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
-            </label>
-          </div>
-          
           <button 
             type="submit" 
-            className={styles.submitButton} 
-            disabled={loading}
+            className={styles.submitButton}
+            disabled={loading || success}
           >
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? (
+              <>
+                <span className={styles.spinner}></span>
+                Creating Account...
+              </>
+            ) : (
+              <>
+                <FiCheck size={20} />
+                Create Account
+              </>
+            )}
           </button>
         </form>
         
         <div className={styles.authFooter}>
-          <p>Already have an account? <a href="/auth/login">Sign in</a></p>
+          <p>Already have an account? <Link href="/auth/login">Sign in</Link></p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

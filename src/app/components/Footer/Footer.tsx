@@ -1,9 +1,31 @@
 'use client';
 
+import Link from 'next/link';
 import { FiFacebook, FiTwitter, FiInstagram, FiLinkedin, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
 import styles from './Footer.module.css';
 
 export default function Footer() {
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Books', path: '/books' },
+    { name: 'Ebooks', path: '/books?type=ebook' },
+    { name: 'Audiobooks', path: '/books?type=audiobook' },
+    { name: 'Library', path: '/library' },
+    { name: 'Cart', path: '/cart' },
+  ];
+  
+  const categories = [
+    'Fiction', 'Non-Fiction', 'Science Fiction', 'Mystery', 
+    'Romance', 'Biography', 'Self-Help', 'Technology'
+  ];
+  
+  const socialLinks = [
+    { icon: <FiFacebook size={20} />, url: '#' },
+    { icon: <FiTwitter size={20} />, url: '#' },
+    { icon: <FiInstagram size={20} />, url: '#' },
+    { icon: <FiLinkedin size={20} />, url: '#' },
+  ];
+
   return (
     <footer className={styles.footer}>
       <div className={styles.footerContent}>
@@ -15,40 +37,42 @@ export default function Footer() {
             Discover and enjoy thousands of ebooks and audiobooks from bestselling authors.
           </p>
           <div className={styles.socialLinks}>
-            <a href="#" className={styles.socialLink}>
-              <FiFacebook size={20} />
-            </a>
-            <a href="#" className={styles.socialLink}>
-              <FiTwitter size={20} />
-            </a>
-            <a href="#" className={styles.socialLink}>
-              <FiInstagram size={20} />
-            </a>
-            <a href="#" className={styles.socialLink}>
-              <FiLinkedin size={20} />
-            </a>
+            {socialLinks.map((social, index) => (
+              <a 
+                key={index} 
+                href={social.url} 
+                className={styles.socialLink}
+                aria-label="Social media link"
+              >
+                {social.icon}
+              </a>
+            ))}
           </div>
         </div>
         
         <div className={styles.footerSection}>
           <h4 className={styles.footerTitle}>Quick Links</h4>
           <ul className={styles.footerLinks}>
-            <li><a href="/">Home</a></li>
-            <li><a href="/books">Books</a></li>
-            <li><a href="/library">My Library</a></li>
-            <li><a href="/cart">Cart</a></li>
-            <li><a href="/wishlist">Wishlist</a></li>
+            {navLinks.map((link, index) => (
+              <li key={index}>
+                <Link href={link.path} className={styles.footerLink}>
+                  {link.name}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
         
         <div className={styles.footerSection}>
           <h4 className={styles.footerTitle}>Categories</h4>
           <ul className={styles.footerLinks}>
-            <li><a href="/books?category=fiction">Fiction</a></li>
-            <li><a href="/books?category=non-fiction">Non-Fiction</a></li>
-            <li><a href="/books?category=sci-fi">Sci-Fi</a></li>
-            <li><a href="/books?category=romance">Romance</a></li>
-            <li><a href="/books?category=mystery">Mystery</a></li>
+            {categories.map((category, index) => (
+              <li key={index}>
+                <Link href={`/books?category=${encodeURIComponent(category)}`} className={styles.footerLink}>
+                  {category}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
         
@@ -74,9 +98,9 @@ export default function Footer() {
       <div className={styles.footerBottom}>
         <p>&copy; {new Date().getFullYear()} LearnVow. All rights reserved.</p>
         <div className={styles.footerPolicies}>
-          <a href="/privacy">Privacy Policy</a>
-          <a href="/terms">Terms of Service</a>
-          <a href="/refund">Refund Policy</a>
+          <Link href="/privacy">Privacy Policy</Link>
+          <Link href="/terms">Terms of Service</Link>
+          <Link href="/refund">Refund Policy</Link>
         </div>
       </div>
     </footer>
