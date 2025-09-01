@@ -36,9 +36,9 @@ export const api = {
       },
     }).then(res => res.json()),
 
-  // Purchase endpoints
-  purchaseBook: (bookId, token) => 
-    fetch(`${API_BASE_URL}/purchase`, {
+  // Payment endpoints
+  initiatePayment: (bookId, token) => 
+    fetch(`${API_BASE_URL}/payment/initiate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -65,15 +65,15 @@ export default function Books() {
     }
     
     try {
-      const response = await api.purchaseBook(bookId, token);
-      if (response.purchase) {
-        alert('Book purchased successfully!');
-        // In a real app, you would update the UI to show the book in the library
+      const response = await api.initiatePayment(bookId, token);
+      if (response.redirectUrl) {
+        // Redirect to payment gateway
+        window.location.href = response.redirectUrl;
       } else {
-        alert('Purchase failed: ' + response.message);
+        alert('Failed to initiate payment: ' + response.message);
       }
     } catch (err) {
-      alert('An error occurred during purchase');
+      alert('An error occurred during payment initiation');
     }
   };
 
