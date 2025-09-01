@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '../api/apiService';
+import { supabase } from '../utils/supabaseClient';
 import { useRouter } from 'next/navigation';
 import styles from './library.module.css';
 
@@ -14,12 +15,20 @@ export default function Library() {
   useEffect(() => {
     const fetchLibrary = async () => {
       try {
-        const response = await api.getLibrary();
+        // Get session token
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (response.error) {
-          setError(response.error.message || 'Failed to fetch library');
+        if (!session) {
+          router.push('/auth/login');
+          return;
+        }
+        
+        const response = await api.getLibrary(session.access_token);
+        
+        if (response.message && response.message !== 'Success') {
+          setError(response.message || 'Failed to fetch library');
         } else {
-          setPurchasedBooks(response.data || []);
+          setPurchasedBooks(response || []);
         }
         setLoading(false);
       } catch (err) {
@@ -29,7 +38,7 @@ export default function Library() {
     };
 
     fetchLibrary();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return <div className={styles.container}>Loading library...</div>;

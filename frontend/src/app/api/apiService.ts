@@ -1,18 +1,15 @@
-// API service for connecting to backend and Supabase
+// API service for connecting to Vercel API routes and Supabase
 import { supabase } from '../utils/supabaseClient';
 
-// Determine backend URL based on environment
-const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 
-  (process.env.NODE_ENV === 'production' 
-    ? 'https://your-render-backend.onrender.com' // Update this with your actual backend URL
-    : 'http://localhost:3001');
-
-const API_BASE_URL = `${BACKEND_BASE_URL}/api`;
+// Determine API base URL based on environment
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? '' // Vercel API routes are relative to the same domain
+  : 'http://localhost:3000';
 
 export const api = {
   // Auth endpoints
   register: async (userData) => {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -23,7 +20,7 @@ export const api = {
   },
 
   login: async (credentials) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,56 +30,37 @@ export const api = {
     return response.json();
   },
 
-  getCurrentUser: async () => {
-    const response = await fetch(`${API_BASE_URL}/auth/me`);
-    return response.json();
-  },
-
   // Book endpoints
   getBooks: async () => {
-    const response = await fetch(`${API_BASE_URL}/books`);
+    const response = await fetch(`${API_BASE_URL}/api/books`);
     return response.json();
   },
 
   getBook: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/books/${id}`);
+    const response = await fetch(`${API_BASE_URL}/api/books/${id}`);
     return response.json();
   },
 
-  // Library endpoints (using Supabase directly)
-  getLibrary: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-    
-    // Call the Supabase function we created
-    const { data, error } = await supabase.rpc('get_user_library', {
-      user_uuid: user.id
+  // Library endpoints
+  getLibrary: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/api/library`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
     });
-    
-    if (error) throw error;
-    return data;
+    return response.json();
   },
 
-  // Purchase endpoints (using backend API)
-  purchaseBook: async (bookId) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      throw new Error('User not authenticated');
-    }
-    
-    const response = await fetch(`${API_BASE_URL}/purchase`, {
+  // Purchase endpoints
+  purchaseBook: async (bookId, token) => {
+    const response = await fetch(`${API_BASE_URL}/api/purchase`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ bookId }),
     });
-    
     return response.json();
   },
 

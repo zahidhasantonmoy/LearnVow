@@ -20,9 +20,10 @@ export default function Login() {
     try {
       const response = await api.login({ email, password });
       
-      if (response.error) {
-        setError(response.error.message || 'Login failed');
+      if (response.message && response.message !== 'Login successful') {
+        setError(response.message || 'Login failed');
       } else {
+        // Store session in Supabase
         // Redirect to books page or dashboard
         router.push('/books');
         router.refresh();

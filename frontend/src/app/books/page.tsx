@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/apiService';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../utils/supabaseClient';
 import styles from './books.module.css';
 
 export default function Books() {
@@ -23,11 +24,11 @@ export default function Books() {
       try {
         const response = await api.getBooks();
         
-        if (response.error) {
-          setError(response.error.message || 'Failed to fetch books');
+        if (response.message && response.message !== 'Success') {
+          setError(response.message || 'Failed to fetch books');
         } else {
-          setBooks(response.data || []);
-          setFilteredBooks(response.data || []);
+          setBooks(response || []);
+          setFilteredBooks(response || []);
         }
         setLoading(false);
       } catch (err) {
@@ -65,10 +66,18 @@ export default function Books() {
 
   const handlePurchase = async (bookId) => {
     try {
-      const response = await api.purchaseBook(bookId);
+      // Get session token
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (response.error) {
-        alert('Purchase failed: ' + response.error.message);
+      if (!session) {
+        router.push('/auth/login');
+        return;
+      }
+      
+      const response = await api.purchaseBook(bookId, session.access_token);
+      
+      if (response.message && response.message !== 'Purchase successful') {
+        alert('Purchase failed: ' + response.message);
       } else {
         alert('Book purchased successfully!');
         // Refresh the page to update the UI

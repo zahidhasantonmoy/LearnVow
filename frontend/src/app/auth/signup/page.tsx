@@ -28,8 +28,8 @@ export default function Signup() {
     try {
       const response = await api.register({ name, email, password });
       
-      if (response.error) {
-        setError(response.error.message || 'Registration failed');
+      if (response.message && response.message !== 'User registered successfully') {
+        setError(response.message || 'Registration failed');
       } else {
         // Redirect to books page or dashboard
         router.push('/books');
