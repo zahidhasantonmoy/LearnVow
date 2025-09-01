@@ -1,66 +1,84 @@
+const supabase = require('../config/supabase');
 const User = require('../models/User');
 
-// Mock authentication token generation
-const generateToken = (userId) => {
-  // In a real app, this would generate a JWT
-  return `mock-jwt-token-for-user-${userId}`;
-};
-
-exports.register = (req, res) => {
+// Register a new user
+exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Check if user already exists
-    const existingUser = User.findByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+    // Sign up with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name
+        }
+      }
+    });
+
+    if (error) {
+      return res.status(400).json({ message: error.message });
     }
 
-    // Create new user
-    const newUser = User.create({ name, email, password });
-    
-    // Generate token
-    const token = generateToken(newUser.id);
-    
+    // Create user record in our users table
+    if (data.user) {
+      await User.create({
+        id: data.user.id,
+        name,
+        email
+      });
+    }
+
     res.status(201).json({
       message: 'User registered successfully',
-      token,
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email
-      }
+      user: data.user
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-exports.login = (req, res) => {
+// Login user
+exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email
-    const user = User.findByEmail(email);
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+    // Sign in with Supabase Auth
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      return res.status(400).json({ message: error.message });
     }
 
-    // Check password (in a real app, this would be hashed)
-    if (user.password !== password) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    // Generate token
-    const token = generateToken(user.id);
-    
     res.json({
       message: 'Login successful',
-      token,
+      user: data.user,
+      session: data.session
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Get current user
+exports.getCurrentUser = async (req, res) => {
+  try {
+    // Get user from Supabase Auth
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    res.json({
       user: {
         id: user.id,
-        name: user.name,
-        email: user.email
+        email: user.email,
+        name: user.user_metadata?.name
       }
     });
   } catch (error) {
