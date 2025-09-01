@@ -4,7 +4,7 @@ LearnVow is a full-stack web application for an Ebook and Audiobook platform tha
 
 ## Features
 
-- User authentication (signup/login)
+- User authentication (signup/login) with Supabase Auth
 - Browse books (categories, search, filters)
 - Purchase books via payment gateway
 - "My Library" for purchased books
@@ -19,19 +19,20 @@ LearnVow is a full-stack web application for an Ebook and Audiobook platform tha
 - **Next.js** - React framework with SSR
 - **TypeScript** - Type safety
 - **CSS Modules** - Styling
+- **Supabase** - Authentication and database
 
 ### Backend
 - **Node.js** - JavaScript runtime
 - **Express.js** - Web framework
-- **PostgreSQL** - Database
-- **JWT** - Authentication
+- **Supabase** - Database and authentication
+- **JWT** - Authentication (fallback)
 
 ### Payment Integration
 - **SSLCommerz** - Payment gateway (Bkash, Nagad, Cards)
 
 ### Security
 - **Signed URLs** - Secure file access
-- **JWT Authentication** - User sessions
+- **Supabase Auth** - User sessions
 - **CORS** - Cross-origin resource sharing protection
 
 ## Project Structure
@@ -61,30 +62,32 @@ learnvow/
 
 ### Prerequisites
 - Node.js (v14 or higher)
-- PostgreSQL database
+- Supabase account (for database and authentication)
 - SSLCommerz account (for payment integration)
 
 ### Environment Variables
 
-Create a `.env` file in the `backend` directory with the following variables:
-
+#### Backend (.env in backend directory):
 ```env
 PORT=3001
 JWT_SECRET=your-super-secret-jwt-key
-DATABASE_URL=postgresql://user:password@localhost:5432/learnvow
+SUPABASE_URL=https://htvficmfwlkxaoxgsslc.supabase.co
+SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dmZpY21md2xreGFveGdzc2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MzIyMTYsImV4cCI6MjA3MjMwODIxNn0.e03QaHrUvAKdqRVoC9C5P_PhWCNVx5blVVa1YQtL2PE
 SSLCOMMERZ_STORE_ID=your_store_id
 SSLCOMMERZ_STORE_PASSWORD=your_store_password
 SSLCOMMERZ_API_URL=https://sandbox.sslcommerz.com/gwprocess/v4/api.php
 BASE_URL=http://localhost:3001
 ```
 
+#### Frontend (.env.local in frontend directory):
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://htvficmfwlkxaoxgsslc.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dmZpY21md2xreGFveGdzc2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MzIyMTYsImV4cCI6MjA3MjMwODIxNn0.e03QaHrUvAKdqRVoC9C5P_PhWCNVx5blVVa1YQtL2PE
+```
+
 ### Database Setup
 
-1. Create a PostgreSQL database named `learnvow`
-2. Run the schema file to create tables:
-   ```bash
-   psql -U your_username -d learnvow -f backend/src/config/schema.sql
-   ```
+The database tables have already been created in your Supabase project. Make sure you've run the SQL commands from the previous step.
 
 ### Installation
 
@@ -106,7 +109,7 @@ BASE_URL=http://localhost:3001
    npm install
    ```
 
-### Running the Application
+### Running the Application Locally
 
 1. Start the backend server:
    ```bash
@@ -114,7 +117,7 @@ BASE_URL=http://localhost:3001
    npm run dev
    ```
 
-2. Start the frontend development server:
+2. Start the frontend development server (in a new terminal):
    ```bash
    cd frontend
    npm run dev
@@ -122,11 +125,70 @@ BASE_URL=http://localhost:3001
 
 3. Open your browser and navigate to `http://localhost:3000`
 
+## Vercel Deployment
+
+### Frontend Deployment
+
+1. **Connect to Vercel**:
+   - Go to https://vercel.com/
+   - Sign up or log in
+   - Click "New Project"
+   - Import your GitHub repository
+
+2. **Configure Project Settings**:
+   - Framework Preset: Next.js
+   - Root Directory: `frontend`
+   - Build Command: `npm run build`
+   - Output Directory: `.next`
+   - Install Command: `npm install`
+
+3. **Add Environment Variables**:
+   - In Vercel project settings, go to "Environment Variables"
+   - Add the following variables:
+     - `NEXT_PUBLIC_SUPABASE_URL` = `https://htvficmfwlkxaoxgsslc.supabase.co`
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dmZpY21md2xreGFveGdzc2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MzIyMTYsImV4cCI6MjA3MjMwODIxNn0.e03QaHrUvAKdqRVoC9C5P_PhWCNVx5blVVa1YQtL2PE`
+
+4. **Deploy**:
+   - Click "Deploy"
+   - Vercel will automatically build and deploy your frontend
+
+### Backend Deployment
+
+For the backend, you can deploy to any Node.js hosting platform. Here are options:
+
+#### Option 1: Render (Recommended for simplicity)
+
+1. Go to https://render.com/
+2. Create a new Web Service
+3. Connect your GitHub repository
+4. Set the following:
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+   - Root Directory: `backend`
+5. Add Environment Variables:
+   - `PORT` = `10000`
+   - `JWT_SECRET` = `your-super-secret-jwt-key`
+   - `SUPABASE_URL` = `https://htvficmfwlkxaoxgsslc.supabase.co`
+   - `SUPABASE_KEY` = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dmZpY21md2xreGFveGdzc2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MzIyMTYsImV4cCI6MjA3MjMwODIxNn0.e03QaHrUvAKdqRVoC9C5P_PhWCNVx5blVVa1YQtL2PE`
+   - `SSLCOMMERZ_STORE_ID` = `your_store_id`
+   - `SSLCOMMERZ_STORE_PASSWORD` = `your_store_password`
+   - `SSLCOMMERZ_API_URL` = `https://sandbox.sslcommerz.com/gwprocess/v4/api.php`
+   - `BASE_URL` = `https://your-render-url.onrender.com`
+
+#### Option 2: Railway
+
+1. Go to https://railway.app/
+2. Create a new project
+3. Deploy from your GitHub repository
+4. Set the root directory to `backend`
+5. Add the same environment variables as above
+
 ## API Endpoints
 
 ### Authentication
 - `POST /api/auth/register` - Register a new user
 - `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get current user
 
 ### Books
 - `GET /api/books` - Get all books
@@ -146,35 +208,22 @@ BASE_URL=http://localhost:3001
 ### File Access
 - `POST /api/files/generate-signed-url` - Generate a signed URL for secure file access
 
-## Deployment
-
-### Frontend
-Deploy the frontend to Vercel for optimal performance with Next.js.
-
-### Backend
-Deploy the backend to any Node.js hosting platform (e.g., Heroku, DigitalOcean App Platform).
-
-### Database
-Use a managed PostgreSQL service (e.g., Supabase, AWS RDS).
-
 ## Security Considerations
 
 1. All file access is protected with signed URLs that expire after a set time
-2. User authentication is handled with JWT tokens
-3. Passwords should be hashed before storing in the database
+2. User authentication is handled with Supabase Auth
+3. Passwords are hashed by Supabase
 4. CORS is configured to only allow requests from the frontend domain
-5. HTTPS should be used in production
+5. HTTPS is enforced by Vercel and most hosting platforms
 
 ## Future Improvements
 
-1. Implement password hashing for user authentication
-2. Add email verification for new users
-3. Implement password reset functionality
-4. Add book reviews and ratings
-5. Implement recommendations based on reading history
-6. Add bookmark functionality for ebooks
-7. Implement offline reading/listening capabilities
-8. Add social features (reading challenges, friends, etc.)
+1. Implement password reset functionality
+2. Add book reviews and ratings
+3. Implement recommendations based on reading history
+4. Add bookmark functionality for ebooks
+5. Implement offline reading/listening capabilities
+6. Add social features (reading challenges, friends, etc.)
 
 ## Contributing
 

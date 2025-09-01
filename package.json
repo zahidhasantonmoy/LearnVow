@@ -1,26 +1,30 @@
 {
   "name": "learnvow",
   "version": "1.0.0",
-  "description": "This is a full-stack web application for an Ebook and Audiobook platform.",
+  "description": "Ebook and Audiobook Platform",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && npm start",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
- "dependencies": {
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest"
-  },
+  "keywords": [
+    "ebook",
+    "audiobook",
+    "platform",
+    "nextjs",
+    "nodejs",
+    "supabase"
+  ],
+  "author": "LearnVow Team",
+  "license": "MIT",
   "devDependencies": {
-    "typescript": "latest",
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest"
+    "concurrently": "^7.6.0"
   }
 }
