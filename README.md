@@ -22,10 +22,9 @@ LearnVow is a full-stack web application for an Ebook and Audiobook platform tha
 - **Supabase** - Authentication and database
 
 ### Backend
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web framework
+- **Vercel Serverless Functions** - API endpoints
 - **Supabase** - Database and authentication
-- **JWT** - Authentication (fallback)
+- **Node.js** - Runtime environment
 
 ### Payment Integration
 - **SSLCommerz** - Payment gateway (Bkash, Nagad, Cards)
@@ -43,17 +42,8 @@ learnvow/
 │   ├── src/
 │   │   ├── app/        # App router pages
 │   │   ├── components/ # Reusable components
+│   │   ├── pages/      # API routes (Vercel serverless functions)
 │   │   └── api/        # API service
-│   └── ...
-├── backend/            # Node.js backend
-│   ├── src/
-│   │   ├── controllers/ # Request handlers
-│   │   ├── models/      # Database models
-│   │   ├── routes/      # API routes
-│   │   ├── services/    # Business logic
-│   │   ├── middleware/  # Middleware functions
-│   │   ├── config/      # Configuration files
-│   │   └── utils/       # Utility functions
 │   └── ...
 └── ...
 ```
@@ -66,18 +56,6 @@ learnvow/
 - SSLCommerz account (for payment integration)
 
 ### Environment Variables
-
-#### Backend (.env in backend directory):
-```env
-PORT=3001
-JWT_SECRET=your-super-secret-jwt-key
-SUPABASE_URL=https://htvficmfwlkxaoxgsslc.supabase.co
-SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dmZpY21md2xreGFveGdzc2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MzIyMTYsImV4cCI6MjA3MjMwODIxNn0.e03QaHrUvAKdqRVoC9C5P_PhWCNVx5blVVa1YQtL2PE
-SSLCOMMERZ_STORE_ID=your_store_id
-SSLCOMMERZ_STORE_PASSWORD=your_store_password
-SSLCOMMERZ_API_URL=https://sandbox.sslcommerz.com/gwprocess/v4/api.php
-BASE_URL=http://localhost:3001
-```
 
 #### Frontend (.env.local in frontend directory):
 ```env
@@ -103,31 +81,19 @@ The database tables have already been created in your Supabase project. Make sur
    npm install
    ```
 
-3. Install backend dependencies:
-   ```bash
-   cd ../backend
-   npm install
-   ```
-
 ### Running the Application Locally
 
-1. Start the backend server:
-   ```bash
-   cd backend
-   npm run dev
-   ```
-
-2. Start the frontend development server (in a new terminal):
+1. Start the frontend development server:
    ```bash
    cd frontend
    npm run dev
    ```
 
-3. Open your browser and navigate to `http://localhost:3000`
+2. Open your browser and navigate to `http://localhost:3000`
 
 ## Vercel Deployment
 
-### Frontend Deployment
+### Deploying to Vercel (Frontend + Backend)
 
 1. **Connect to Vercel**:
    - Go to https://vercel.com/
@@ -150,45 +116,24 @@ The database tables have already been created in your Supabase project. Make sur
 
 4. **Deploy**:
    - Click "Deploy"
-   - Vercel will automatically build and deploy your frontend
+   - Vercel will automatically build and deploy your frontend and backend API routes
 
-### Backend Deployment
+### How It Works
 
-For the backend, you can deploy to any Node.js hosting platform. Here are options:
+This project uses Vercel's serverless functions to host both the frontend and backend:
 
-#### Option 1: Render (Recommended for simplicity)
+1. **Frontend**: Next.js application served from Vercel's edge network
+2. **Backend**: API routes implemented as serverless functions in `frontend/src/pages/api/`
+3. **Database**: Supabase PostgreSQL database
+4. **Authentication**: Supabase Auth
 
-1. Go to https://render.com/
-2. Create a new Web Service
-3. Connect your GitHub repository
-4. Set the following:
-   - Build Command: `npm install`
-   - Start Command: `npm start`
-   - Root Directory: `backend`
-5. Add Environment Variables:
-   - `PORT` = `10000`
-   - `JWT_SECRET` = `your-super-secret-jwt-key`
-   - `SUPABASE_URL` = `https://htvficmfwlkxaoxgsslc.supabase.co`
-   - `SUPABASE_KEY` = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dmZpY21md2xreGFveGdzc2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MzIyMTYsImV4cCI6MjA3MjMwODIxNn0.e03QaHrUvAKdqRVoC9C5P_PhWCNVx5blVVa1YQtL2PE`
-   - `SSLCOMMERZ_STORE_ID` = `your_store_id`
-   - `SSLCOMMERZ_STORE_PASSWORD` = `your_store_password`
-   - `SSLCOMMERZ_API_URL` = `https://sandbox.sslcommerz.com/gwprocess/v4/api.php`
-   - `BASE_URL` = `https://your-render-url.onrender.com`
-
-#### Option 2: Railway
-
-1. Go to https://railway.app/
-2. Create a new project
-3. Deploy from your GitHub repository
-4. Set the root directory to `backend`
-5. Add the same environment variables as above
+The API routes are automatically deployed as serverless functions alongside your frontend application.
 
 ## API Endpoints
 
 ### Authentication
 - `POST /api/auth/register` - Register a new user
 - `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user
 
 ### Books
 - `GET /api/books` - Get all books
@@ -202,8 +147,7 @@ For the backend, you can deploy to any Node.js hosting platform. Here are option
 - `POST /api/payment/verify` - Verify a payment
 
 ### Reading Progress
-- `GET /api/progress/:bookId` - Get reading progress for a book
-- `POST /api/progress/:bookId` - Update reading progress for a book
+- Reading progress is handled directly through Supabase client
 
 ### File Access
 - `POST /api/files/generate-signed-url` - Generate a signed URL for secure file access
@@ -213,8 +157,8 @@ For the backend, you can deploy to any Node.js hosting platform. Here are option
 1. All file access is protected with signed URLs that expire after a set time
 2. User authentication is handled with Supabase Auth
 3. Passwords are hashed by Supabase
-4. CORS is configured to only allow requests from the frontend domain
-5. HTTPS is enforced by Vercel and most hosting platforms
+4. CORS is handled automatically by Vercel
+5. HTTPS is enforced by Vercel
 
 ## Future Improvements
 
