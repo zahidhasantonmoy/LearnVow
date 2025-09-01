@@ -8,6 +8,8 @@ dotenv.config();
 // Import routes
 const authRoutes = require('./src/routes/authRoutes');
 const bookRoutes = require('./src/routes/bookRoutes');
+const libraryRoutes = require('./src/routes/libraryRoutes');
+const purchaseRoutes = require('./src/routes/purchaseRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -19,6 +21,8 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
+app.use('/api/library', libraryRoutes);
+app.use('/api/purchase', purchaseRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'LearnVow API is running!' });

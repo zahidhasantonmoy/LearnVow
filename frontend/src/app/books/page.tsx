@@ -1,61 +1,36 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { api } from '../api/apiService';
 import styles from './books.module.css';
 
-// Mock data for books
-const mockBooks = [
-  {
-    id: 1,
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    category: 'Fiction',
-    type: 'ebook',
-    price: 12.99,
-    cover: '/book1.jpg',
-    description: 'A classic American novel set in the summer of 1922.'
-  },
-  {
-    id: 2,
-    title: 'To Kill a Mockingbird',
-    author: 'Harper Lee',
-    category: 'Fiction',
-    type: 'audiobook',
-    price: 14.99,
-    cover: '/book2.jpg',
-    description: 'A gripping tale of racial injustice and childhood innocence.'
-  },
-  {
-    id: 3,
-    title: '1984',
-    author: 'George Orwell',
-    category: 'Science Fiction',
-    type: 'ebook',
-    price: 13.99,
-    cover: '/book3.jpg',
-    description: 'A dystopian social science fiction novel.'
-  },
-  {
-    id: 4,
-    title: 'Pride and Prejudice',
-    author: 'Jane Austen',
-    category: 'Romance',
-    type: 'audiobook',
-    price: 11.99,
-    cover: '/book4.jpg',
-    description: 'A romantic novel of manners.'
-  }
-];
-
 export default function Books() {
-  const [books, setBooks] = useState(mockBooks);
-  const [filteredBooks, setFilteredBooks] = useState(mockBooks);
+  const [books, setBooks] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   // Get unique categories for filter dropdown
-  const categories = ['All', ...new Set(mockBooks.map(book => book.category))];
+  const categories = ['All', ...new Set(books.map(book => book.category))];
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const data = await api.getBooks();
+        setBooks(data);
+        setFilteredBooks(data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch books');
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   useEffect(() => {
     let result = books;
@@ -80,6 +55,35 @@ export default function Books() {
     
     setFilteredBooks(result);
   }, [searchTerm, categoryFilter, typeFilter, books]);
+
+  const handlePurchase = async (bookId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // Redirect to login if not authenticated
+      window.location.href = '/auth/login';
+      return;
+    }
+    
+    try {
+      const response = await api.purchaseBook(bookId, token);
+      if (response.purchase) {
+        alert('Book purchased successfully!');
+        // In a real app, you would update the UI to show the book in the library
+      } else {
+        alert('Purchase failed: ' + response.message);
+      }
+    } catch (err) {
+      alert('An error occurred during purchase');
+    }
+  };
+
+  if (loading) {
+    return <div className={styles.container}>Loading books...</div>;
+  }
+
+  if (error) {
+    return <div className={styles.container}>Error: {error}</div>;
+  }
 
   return (
     <div className={styles.container}>
@@ -127,7 +131,12 @@ export default function Books() {
               <p className={styles.bookCategory}>{book.category}</p>
               <p className={styles.bookType}>{book.type}</p>
               <p className={styles.bookPrice}>${book.price}</p>
-              <button className={styles.buyButton}>Buy Now</button>
+              <button 
+                className={styles.buyButton}
+                onClick={() => handlePurchase(book.id)}
+              >
+                Buy Now
+              </button>
             </div>
           </div>
         ))}

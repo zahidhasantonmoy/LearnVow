@@ -83,3 +83,22 @@
 .continueButton:hover {
   background-color: #0051a2;
 }
+
+.emptyLibrary {
+  text-align: center;
+  padding: 2rem;
+}
+
+.browseLink {
+  display: inline-block;
+  background-color: #0070f3;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  margin-top: 1rem;
+}
+
+.browseLink:hover {
+  background-color: #0051a2;
+}

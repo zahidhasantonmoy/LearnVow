@@ -1,18 +1,27 @@
 {
-  "name": "backend",
+  "name": "learnvow-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend API for LearnVow Ebook and Audiobook Platform",
   "main": "index.js",
   "scripts": {
-    "dev": "node index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "ebook",
+    "audiobook",
+    "platform",
+    "api"
+  ],
+  "author": "LearnVow Team",
+  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
-    "express": "^4.21.2"
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
