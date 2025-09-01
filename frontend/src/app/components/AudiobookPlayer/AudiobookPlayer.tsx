@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { api } from '../../api/apiService';
 import styles from './AudiobookPlayer.module.css';
 
 export default function AudiobookPlayer({ book }) {
@@ -10,6 +11,39 @@ export default function AudiobookPlayer({ book }) {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await api.getProgress(book.id, token);
+          setProgress(response.progress);
+          // Set current time based on progress
+          if (audioRef.current) {
+            audioRef.current.currentTime = (response.progress / 100) * duration;
+          }
+        } catch (err) {
+          console.error('Failed to fetch listening progress');
+        }
+      }
+    };
+
+    fetchProgress();
+  }, [book.id, duration]);
+
+  const updateProgress = async (newProgress) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await api.updateProgress(book.id, newProgress, token);
+        setProgress(newProgress);
+      } catch (err) {
+        console.error('Failed to update listening progress');
+      }
+    }
+  };
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -21,14 +55,27 @@ export default function AudiobookPlayer({ book }) {
 
     const setAudioTime = () => {
       setCurrentTime(audio.currentTime);
+      // Update progress
+      if (audio.duration > 0) {
+        const newProgress = (audio.currentTime / audio.duration) * 100;
+        updateProgress(newProgress);
+      }
+    };
+
+    const handleAudioEnd = () => {
+      setIsPlaying(false);
+      // Mark as 100% complete when finished
+      updateProgress(100);
     };
 
     audio.addEventListener('loadeddata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
+    audio.addEventListener('ended', handleAudioEnd);
 
     return () => {
       audio.removeEventListener('loadeddata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
+      audio.removeEventListener('ended', handleAudioEnd);
     };
   }, []);
 
@@ -122,6 +169,10 @@ export default function AudiobookPlayer({ book }) {
             <option value="1.5">1.5x</option>
             <option value="2">2x</option>
           </select>
+        </div>
+        
+        <div className={styles.progressText}>
+          Progress: {progress.toFixed(1)}%
         </div>
       </div>
     </div>

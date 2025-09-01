@@ -1,35 +1,25 @@
-// Mock library model for now
-// In a real application, this would connect to a database
+const db = require('../config/db');
 
 class Library {
-  // Mock method to get purchased books for a user
-  static getUserBooks(userId) {
-    // In a real app, this would query the database for books purchased by the user
-    // For now, we'll return mock data
-    return [
-      {
-        id: 1,
-        userId: userId,
-        bookId: 1,
-        title: 'The Great Gatsby',
-        author: 'F. Scott Fitzgerald',
-        type: 'ebook',
-        cover: '/book1.jpg',
-        progress: 50, // Percentage read/listened
-        lastAccessed: '2023-05-15'
-      },
-      {
-        id: 2,
-        userId: userId,
-        bookId: 2,
-        title: 'To Kill a Mockingbird',
-        author: 'Harper Lee',
-        type: 'audiobook',
-        cover: '/book2.jpg',
-        progress: 75,
-        lastAccessed: '2023-05-10'
-      }
-    ];
+  static async getUserBooks(userId) {
+    const query = `
+      SELECT 
+        b.id,
+        b.title,
+        b.author,
+        b.type,
+        b.cover,
+        COALESCE(rp.progress, 0) as progress,
+        rp.last_accessed
+      FROM books b
+      JOIN purchases p ON b.id = p.book_id
+      LEFT JOIN reading_progress rp ON b.id = rp.book_id AND rp.user_id = $1
+      WHERE p.user_id = $1
+      ORDER BY rp.last_accessed DESC
+    `;
+    
+    const result = await db.query(query, [userId]);
+    return result.rows;
   }
 }
 

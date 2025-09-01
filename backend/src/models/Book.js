@@ -1,33 +1,55 @@
-// Mock book model for now
-// In a real application, this would connect to a database
+const db = require('../config/db');
 
 class Book {
-  constructor(id, title, author, category, type, price, cover, description) {
+  constructor(id, title, author, category, type, price, cover, description, filePath) {
     this.id = id;
     this.title = title;
     this.author = author;
     this.category = category;
-    this.type = type; // 'ebook' or 'audiobook'
+    this.type = type;
     this.price = price;
     this.cover = cover;
     this.description = description;
+    this.filePath = filePath;
   }
 
-  // Mock method to find all books
-  static findAll() {
-    // In a real app, this would query the database
-    return [
-      new Book(1, 'The Great Gatsby', 'F. Scott Fitzgerald', 'Fiction', 'ebook', 12.99, '/book1.jpg', 'A classic American novel set in the summer of 1922.'),
-      new Book(2, 'To Kill a Mockingbird', 'Harper Lee', 'Fiction', 'audiobook', 14.99, '/book2.jpg', 'A gripping tale of racial injustice and childhood innocence.'),
-      new Book(3, '1984', 'George Orwell', 'Science Fiction', 'ebook', 13.99, '/book3.jpg', 'A dystopian social science fiction novel.'),
-      new Book(4, 'Pride and Prejudice', 'Jane Austen', 'Romance', 'audiobook', 11.99, '/book4.jpg', 'A romantic novel of manners.')
-    ];
+  static async findAll() {
+    const query = 'SELECT * FROM books';
+    const result = await db.query(query);
+    
+    return result.rows.map(book => new Book(
+      book.id, 
+      book.title, 
+      book.author, 
+      book.category, 
+      book.type, 
+      book.price, 
+      book.cover, 
+      book.description,
+      book.file_path
+    ));
   }
 
-  // Mock method to find a book by ID
-  static findById(id) {
-    const books = this.findAll();
-    return books.find(book => book.id == id) || null;
+  static async findById(id) {
+    const query = 'SELECT * FROM books WHERE id = $1';
+    const result = await db.query(query, [id]);
+    
+    if (result.rows.length > 0) {
+      const book = result.rows[0];
+      return new Book(
+        book.id, 
+        book.title, 
+        book.author, 
+        book.category, 
+        book.type, 
+        book.price, 
+        book.cover, 
+        book.description,
+        book.file_path
+      );
+    }
+    
+    return null;
   }
 }
 

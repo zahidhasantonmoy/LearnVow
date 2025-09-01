@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { api } from '../../api/apiService';
 import styles from './EbookReader.module.css';
 
 export default function EbookReader({ book }) {
@@ -8,16 +9,58 @@ export default function EbookReader({ book }) {
   const [totalPages] = useState(100); // In a real app, this would come from the book data
   const [fontSize, setFontSize] = useState(16);
   const [theme, setTheme] = useState('light');
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await api.getProgress(book.id, token);
+          setProgress(response.progress);
+          // Set current page based on progress
+          const calculatedPage = Math.floor((response.progress / 100) * totalPages) || 1;
+          setCurrentPage(calculatedPage);
+        } catch (err) {
+          console.error('Failed to fetch reading progress');
+        }
+      }
+    };
+
+    fetchProgress();
+  }, [book.id, totalPages]);
+
+  const updateProgress = async (newProgress) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await api.updateProgress(book.id, newProgress, token);
+        setProgress(newProgress);
+      } catch (err) {
+        console.error('Failed to update reading progress');
+      }
+    }
+  };
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+      const newPage = currentPage + 1;
+      setCurrentPage(newPage);
+      
+      // Update progress
+      const newProgress = Math.floor((newPage / totalPages) * 100);
+      updateProgress(newProgress);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      const newPage = currentPage - 1;
+      setCurrentPage(newPage);
+      
+      // Update progress
+      const newProgress = Math.floor((newPage / totalPages) * 100);
+      updateProgress(newProgress);
     }
   };
 
@@ -87,7 +130,7 @@ Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, ad
         </button>
         
         <span className={styles.pageIndicator}>
-          Page {currentPage} of {totalPages}
+          Page {currentPage} of {totalPages} ({progress}% complete)
         </span>
         
         <button 

@@ -11,6 +11,7 @@ const bookRoutes = require('./src/routes/bookRoutes');
 const libraryRoutes = require('./src/routes/libraryRoutes');
 const purchaseRoutes = require('./src/routes/purchaseRoutes');
 const paymentRoutes = require('./src/routes/paymentRoutes');
+const readingProgressRoutes = require('./src/routes/readingProgressRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,6 +26,7 @@ app.use('/api/books', bookRoutes);
 app.use('/api/library', libraryRoutes);
 app.use('/api/purchase', purchaseRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/progress', readingProgressRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'LearnVow API is running!' });

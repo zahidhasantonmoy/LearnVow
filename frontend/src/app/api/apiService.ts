@@ -46,4 +46,22 @@ export const api = {
       },
       body: JSON.stringify({ bookId }),
     }).then(res => res.json()),
+
+  // Reading progress endpoints
+  getProgress: (bookId, token) => 
+    fetch(`${API_BASE_URL}/progress/${bookId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(res => res.json()),
+
+  updateProgress: (bookId, progress, token) => 
+    fetch(`${API_BASE_URL}/progress/${bookId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ progress }),
+    }).then(res => res.json()),
 };

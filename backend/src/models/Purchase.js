@@ -1,18 +1,26 @@
-// Mock purchase model for now
-// In a real application, this would connect to a database
+const db = require('../config/db');
 
 class Purchase {
-  // Mock method to create a new purchase
-  static createPurchase(userId, bookId) {
-    // In a real app, this would insert a new purchase record in the database
-    // For now, we'll return mock data
-    return {
-      id: Math.floor(Math.random() * 1000),
-      userId: userId,
-      bookId: bookId,
-      purchaseDate: new Date().toISOString(),
-      price: 12.99 // This would come from the book data in a real app
-    };
+  static async createPurchase(userId, bookId) {
+    // First, get the book price
+    const bookQuery = 'SELECT price FROM books WHERE id = $1';
+    const bookResult = await db.query(bookQuery, [bookId]);
+    
+    if (bookResult.rows.length === 0) {
+      throw new Error('Book not found');
+    }
+    
+    const price = bookResult.rows[0].price;
+    
+    // Create the purchase record
+    const purchaseQuery = 'INSERT INTO purchases (user_id, book_id, price) VALUES ($1, $2, $3) RETURNING *';
+    const purchaseResult = await db.query(purchaseQuery, [userId, bookId, price]);
+    
+    if (purchaseResult.rows.length > 0) {
+      return purchaseResult.rows[0];
+    }
+    
+    return null;
   }
 }
 

@@ -1,29 +1,36 @@
-// Mock user model for now
-// In a real application, this would connect to a database
+const db = require('../config/db');
 
 class User {
   constructor(id, name, email, password) {
     this.id = id;
     this.name = name;
     this.email = email;
-    this.password = password; // In a real app, this would be hashed
+    this.password = password;
   }
 
-  // Mock method to find a user by email
-  static findByEmail(email) {
-    // In a real app, this would query the database
-    // For now, we'll return a mock user if the email matches
-    if (email === 'user@example.com') {
-      return new User(1, 'Test User', 'user@example.com', 'password123');
+  static async findByEmail(email) {
+    const query = 'SELECT * FROM users WHERE email = $1';
+    const result = await db.query(query, [email]);
+    
+    if (result.rows.length > 0) {
+      const user = result.rows[0];
+      return new User(user.id, user.name, user.email, user.password);
     }
+    
     return null;
   }
 
-  // Mock method to create a new user
-  static create(userData) {
-    // In a real app, this would insert into the database
-    // For now, we'll just return a mock user
-    return new User(2, userData.name, userData.email, userData.password);
+  static async create(userData) {
+    const { name, email, password } = userData;
+    const query = 'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *';
+    const result = await db.query(query, [name, email, password]);
+    
+    if (result.rows.length > 0) {
+      const user = result.rows[0];
+      return new User(user.id, user.name, user.email, user.password);
+    }
+    
+    return null;
   }
 }
 
