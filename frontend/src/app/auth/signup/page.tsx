@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { api } from '../../api/apiService';
+import { useRouter } from 'next/navigation';
 import styles from '../login/auth.module.css';
 
 export default function Signup() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,13 +28,12 @@ export default function Signup() {
     try {
       const response = await api.register({ name, email, password });
       
-      if (response.token) {
-        // Store token in localStorage (in a real app, you might want to use cookies)
-        localStorage.setItem('token', response.token);
-        // Redirect to books page or dashboard
-        window.location.href = '/books';
+      if (response.error) {
+        setError(response.error.message || 'Registration failed');
       } else {
-        setError(response.message || 'Registration failed');
+        // Redirect to books page or dashboard
+        router.push('/books');
+        router.refresh();
       }
     } catch (err) {
       setError('An error occurred during registration');

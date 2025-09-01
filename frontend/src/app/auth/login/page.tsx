@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { api } from '../api/apiService';
+import { useRouter } from 'next/navigation';
 import styles from './auth.module.css';
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,13 +20,12 @@ export default function Login() {
     try {
       const response = await api.login({ email, password });
       
-      if (response.token) {
-        // Store token in localStorage (in a real app, you might want to use cookies)
-        localStorage.setItem('token', response.token);
-        // Redirect to books page or dashboard
-        window.location.href = '/books';
+      if (response.error) {
+        setError(response.error.message || 'Login failed');
       } else {
-        setError(response.message || 'Login failed');
+        // Redirect to books page or dashboard
+        router.push('/books');
+        router.refresh();
       }
     } catch (err) {
       setError('An error occurred during login');

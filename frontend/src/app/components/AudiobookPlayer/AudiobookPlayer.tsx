@@ -15,18 +15,17 @@ export default function AudiobookPlayer({ book }) {
 
   useEffect(() => {
     const fetchProgress = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await api.getProgress(book.id, token);
-          setProgress(response.progress);
+      try {
+        const response = await api.getProgress(book.id);
+        if (!response.error) {
+          setProgress(response.data || 0);
           // Set current time based on progress
-          if (audioRef.current) {
-            audioRef.current.currentTime = (response.progress / 100) * duration;
+          if (audioRef.current && duration > 0) {
+            audioRef.current.currentTime = ((response.data || 0) / 100) * duration;
           }
-        } catch (err) {
-          console.error('Failed to fetch listening progress');
         }
+      } catch (err) {
+        console.error('Failed to fetch listening progress');
       }
     };
 
@@ -34,14 +33,13 @@ export default function AudiobookPlayer({ book }) {
   }, [book.id, duration]);
 
   const updateProgress = async (newProgress) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        await api.updateProgress(book.id, newProgress, token);
+    try {
+      const response = await api.updateProgress(book.id, newProgress);
+      if (!response.error) {
         setProgress(newProgress);
-      } catch (err) {
-        console.error('Failed to update listening progress');
       }
+    } catch (err) {
+      console.error('Failed to update listening progress');
     }
   };
 

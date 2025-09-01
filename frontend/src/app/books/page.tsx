@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '../api/apiService';
+import { useRouter } from 'next/navigation';
 import styles from './books.module.css';
 
 export default function Books() {
+  const router = useRouter();
   const [books, setBooks] = useState([]);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,9 +21,14 @@ export default function Books() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const data = await api.getBooks();
-        setBooks(data);
-        setFilteredBooks(data);
+        const response = await api.getBooks();
+        
+        if (response.error) {
+          setError(response.error.message || 'Failed to fetch books');
+        } else {
+          setBooks(response.data || []);
+          setFilteredBooks(response.data || []);
+        }
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch books');
@@ -57,23 +64,18 @@ export default function Books() {
   }, [searchTerm, categoryFilter, typeFilter, books]);
 
   const handlePurchase = async (bookId) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      // Redirect to login if not authenticated
-      window.location.href = '/auth/login';
-      return;
-    }
-    
     try {
-      const response = await api.initiatePayment(bookId, token);
-      if (response.redirectUrl) {
-        // Redirect to payment gateway
-        window.location.href = response.redirectUrl;
+      const response = await api.purchaseBook(bookId);
+      
+      if (response.error) {
+        alert('Purchase failed: ' + response.error.message);
       } else {
-        alert('Failed to initiate payment: ' + response.message);
+        alert('Book purchased successfully!');
+        // Refresh the page to update the UI
+        router.refresh();
       }
     } catch (err) {
-      alert('An error occurred during payment initiation');
+      alert('An error occurred during purchase');
     }
   };
 

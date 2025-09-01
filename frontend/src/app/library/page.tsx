@@ -2,28 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '../api/apiService';
+import { useRouter } from 'next/navigation';
 import styles from './library.module.css';
 
 export default function Library() {
+  const router = useRouter();
   const [purchasedBooks, setPurchasedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchLibrary = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        // Redirect to login if not authenticated
-        window.location.href = '/auth/login';
-        return;
-      }
-      
       try {
-        const data = await api.getLibrary(token);
-        setPurchasedBooks(data);
+        const response = await api.getLibrary();
+        
+        if (response.error) {
+          setError(response.error.message || 'Failed to fetch library');
+        } else {
+          setPurchasedBooks(response.data || []);
+        }
         setLoading(false);
       } catch (err) {
-        setError('Failed to fetch library');
+        setError('Failed to fetch library: ' + err.message);
         setLoading(false);
       }
     };
@@ -61,17 +61,17 @@ export default function Library() {
                 <p className={styles.bookType}>{book.type}</p>
                 
                 <div className={styles.progressContainer}>
-                  <span>Progress: {book.progress}%</span>
+                  <span>Progress: {book.progress || 0}%</span>
                   <div className={styles.progressBar}>
                     <div 
                       className={styles.progressFill} 
-                      style={{ width: `${book.progress}%` }}
+                      style={{ width: `${book.progress || 0}%` }}
                     ></div>
                   </div>
                 </div>
                 
                 <p className={styles.lastAccessed}>
-                  Last accessed: {book.lastAccessed}
+                  Last accessed: {book.last_accessed ? new Date(book.last_accessed).toLocaleDateString() : 'Never'}
                 </p>
                 
                 <button className={styles.continueButton}>

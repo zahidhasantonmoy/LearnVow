@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '../../api/apiService';
+import { useRouter } from 'next/navigation';
 import styles from './EbookReader.module.css';
 
 export default function EbookReader({ book }) {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages] = useState(100); // In a real app, this would come from the book data
   const [fontSize, setFontSize] = useState(16);
@@ -13,17 +15,16 @@ export default function EbookReader({ book }) {
 
   useEffect(() => {
     const fetchProgress = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await api.getProgress(book.id, token);
-          setProgress(response.progress);
+      try {
+        const response = await api.getProgress(book.id);
+        if (!response.error) {
+          setProgress(response.data || 0);
           // Set current page based on progress
-          const calculatedPage = Math.floor((response.progress / 100) * totalPages) || 1;
+          const calculatedPage = Math.floor(((response.data || 0) / 100) * totalPages) || 1;
           setCurrentPage(calculatedPage);
-        } catch (err) {
-          console.error('Failed to fetch reading progress');
         }
+      } catch (err) {
+        console.error('Failed to fetch reading progress');
       }
     };
 
@@ -31,14 +32,13 @@ export default function EbookReader({ book }) {
   }, [book.id, totalPages]);
 
   const updateProgress = async (newProgress) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        await api.updateProgress(book.id, newProgress, token);
+    try {
+      const response = await api.updateProgress(book.id, newProgress);
+      if (!response.error) {
         setProgress(newProgress);
-      } catch (err) {
-        console.error('Failed to update reading progress');
       }
+    } catch (err) {
+      console.error('Failed to update reading progress');
     }
   };
 
