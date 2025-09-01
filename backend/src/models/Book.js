@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const supabase = require('../config/supabase');
 
 class Book {
   constructor(id, title, author, category, type, price, cover, description, filePath) {
@@ -14,10 +14,16 @@ class Book {
   }
 
   static async findAll() {
-    const query = 'SELECT * FROM books';
-    const result = await db.query(query);
-    
-    return result.rows.map(book => new Book(
+    const { data, error } = await supabase
+      .from('books')
+      .select('*');
+
+    if (error) {
+      console.error('Error fetching books:', error);
+      return [];
+    }
+
+    return data.map(book => new Book(
       book.id, 
       book.title, 
       book.author, 
@@ -31,24 +37,31 @@ class Book {
   }
 
   static async findById(id) {
-    const query = 'SELECT * FROM books WHERE id = $1';
-    const result = await db.query(query, [id]);
-    
-    if (result.rows.length > 0) {
-      const book = result.rows[0];
+    const { data, error } = await supabase
+      .from('books')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching book by ID:', error);
+      return null;
+    }
+
+    if (data) {
       return new Book(
-        book.id, 
-        book.title, 
-        book.author, 
-        book.category, 
-        book.type, 
-        book.price, 
-        book.cover, 
-        book.description,
-        book.file_path
+        data.id, 
+        data.title, 
+        data.author, 
+        data.category, 
+        data.type, 
+        data.price, 
+        data.cover, 
+        data.description,
+        data.file_path
       );
     }
-    
+
     return null;
   }
 }

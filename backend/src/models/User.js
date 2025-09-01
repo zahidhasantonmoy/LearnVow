@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const supabase = require('../config/supabase');
 
 class User {
   constructor(id, name, email, password) {
@@ -9,27 +9,45 @@ class User {
   }
 
   static async findByEmail(email) {
-    const query = 'SELECT * FROM users WHERE email = $1';
-    const result = await db.query(query, [email]);
-    
-    if (result.rows.length > 0) {
-      const user = result.rows[0];
-      return new User(user.id, user.name, user.email, user.password);
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error) {
+      console.error('Error finding user by email:', error);
+      return null;
     }
-    
+
+    if (data) {
+      return new User(data.id, data.name, data.email, data.password);
+    }
+
     return null;
   }
 
   static async create(userData) {
-    const { name, email, password } = userData;
-    const query = 'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *';
-    const result = await db.query(query, [name, email, password]);
-    
-    if (result.rows.length > 0) {
-      const user = result.rows[0];
-      return new User(user.id, user.name, user.email, user.password);
+    const { data, error } = await supabase
+      .from('users')
+      .insert([
+        {
+          name: userData.name,
+          email: userData.email,
+          password: userData.password
+        }
+      ])
+      .single();
+
+    if (error) {
+      console.error('Error creating user:', error);
+      return null;
     }
-    
+
+    if (data) {
+      return new User(data.id, data.name, data.email, data.password);
+    }
+
     return null;
   }
 }

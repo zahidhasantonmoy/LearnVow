@@ -1,32 +1,72 @@
-const db = require('../config/db');
+const supabase = require('../config/supabase');
 
 class ReadingProgress {
   static async getProgress(userId, bookId) {
-    const query = 'SELECT progress FROM reading_progress WHERE user_id = $1 AND book_id = $2';
-    const result = await db.query(query, [userId, bookId]);
-    
-    if (result.rows.length > 0) {
-      return result.rows[0].progress;
+    const { data, error } = await supabase
+      .from('reading_progress')
+      .select('progress')
+      .eq('user_id', userId)
+      .eq('book_id', bookId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching reading progress:', error);
+      return 0;
     }
-    
-    return 0;
+
+    return data ? data.progress : 0;
   }
 
   static async updateProgress(userId, bookId, progress) {
     // Check if progress record exists
-    const checkQuery = 'SELECT id FROM reading_progress WHERE user_id = $1 AND book_id = $2';
-    const checkResult = await db.query(checkQuery, [userId, bookId]);
-    
-    if (checkResult.rows.length > 0) {
+    const { data: existingData, error: selectError } = await supabase
+      .from('reading_progress')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('book_id', bookId)
+      .single();
+
+    if (selectError && selectError.code !== 'PGRST116') {
+      console.error('Error checking existing progress:', selectError);
+      throw selectError;
+    }
+
+    if (existingData) {
       // Update existing record
-      const updateQuery = 'UPDATE reading_progress SET progress = $1, last_accessed = CURRENT_TIMESTAMP WHERE user_id = $2 AND book_id = $3 RETURNING *';
-      const result = await db.query(updateQuery, [progress, userId, bookId]);
-      return result.rows[0];
+      const { data, error } = await supabase
+        .from('reading_progress')
+        .update({ progress: progress, last_accessed: new Date() })
+        .eq('user_id', userId)
+        .eq('book_id', bookId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating progress:', error);
+        throw error;
+      }
+
+      return data;
     } else {
       // Create new record
-      const insertQuery = 'INSERT INTO reading_progress (user_id, book_id, progress) VALUES ($1, $2, $3) RETURNING *';
-      const result = await db.query(insertQuery, [userId, bookId, progress]);
-      return result.rows[0];
+      const { data, error } = await supabase
+        .from('reading_progress')
+        .insert([
+          {
+            user_id: userId,
+            book_id: bookId,
+            progress: progress
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating progress record:', error);
+        throw error;
+      }
+
+      return data;
     }
   }
 }

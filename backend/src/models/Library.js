@@ -1,25 +1,35 @@
-const db = require('../config/db');
+const supabase = require('../config/supabase');
 
 class Library {
   static async getUserBooks(userId) {
-    const query = `
-      SELECT 
-        b.id,
-        b.title,
-        b.author,
-        b.type,
-        b.cover,
-        COALESCE(rp.progress, 0) as progress,
-        rp.last_accessed
-      FROM books b
-      JOIN purchases p ON b.id = p.book_id
-      LEFT JOIN reading_progress rp ON b.id = rp.book_id AND rp.user_id = $1
-      WHERE p.user_id = $1
-      ORDER BY rp.last_accessed DESC
-    `;
-    
-    const result = await db.query(query, [userId]);
-    return result.rows;
+    const { data, error } = await supabase
+      .from('books')
+      .select(`
+        id,
+        title,
+        author,
+        type,
+        cover,
+        reading_progress(progress),
+        purchases(price)
+      `)
+      .eq('purchases.user_id', userId);
+
+    if (error) {
+      console.error('Error fetching user library:', error);
+      return [];
+    }
+
+    return data.map(book => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      type: book.type,
+      cover: book.cover,
+      progress: book.reading_progress?.[0]?.progress || 0,
+      price: book.purchases?.[0]?.price || 0,
+      last_accessed: book.reading_progress?.[0]?.last_accessed || null
+    }));
   }
 }
 
