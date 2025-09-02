@@ -1,4 +1,4 @@
-// Signup page with modern styling and animations
+// Enhanced Signup page with improved mobile responsiveness
 'use client';
 
 import { useState } from 'react';
@@ -48,7 +48,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-900 flex items-center justify-center p-4 pt-24">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -102,7 +102,7 @@ export default function Signup() {
             
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full touch-target" 
               disabled={loading}
             >
               {loading ? 'Creating account...' : 'Sign Up'}
@@ -112,7 +112,7 @@ export default function Signup() {
           <div className="mt-6 text-center">
             <p className="text-gray-400">
               Already have an account?{' '}
-              <a href="/login" className="text-indigo-400 hover:text-indigo-300">
+              <a href="/login" className="text-indigo-400 hover:text-indigo-300 touch-target">
                 Sign in
               </a>
             </p>

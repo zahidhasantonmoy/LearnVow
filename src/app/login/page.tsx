@@ -1,4 +1,4 @@
-// Login page with modern styling and animations
+// Enhanced Login page with improved mobile responsiveness
 'use client';
 
 import { useState } from 'react';
@@ -33,7 +33,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-900 flex items-center justify-center p-4 pt-24">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -78,15 +78,18 @@ export default function Login() {
             
             <div className="flex items-center justify-between mb-6">
               <label className="flex items-center">
-                <input type="checkbox" className="rounded bg-gray-800 border-gray-700 text-indigo-600 focus:ring-indigo-500" />
+                <input 
+                  type="checkbox" 
+                  className="rounded bg-gray-800 border-gray-700 text-indigo-600 focus:ring-indigo-500 touch-target" 
+                />
                 <span className="ml-2 text-gray-400">Remember me</span>
               </label>
-              <a href="#" className="text-indigo-400 hover:text-indigo-300 text-sm">Forgot password?</a>
+              <a href="#" className="text-indigo-400 hover:text-indigo-300 text-sm touch-target">Forgot password?</a>
             </div>
             
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full touch-target" 
               disabled={loading}
             >
               {loading ? 'Signing in...' : 'Sign In'}
@@ -96,7 +99,7 @@ export default function Login() {
           <div className="mt-6 text-center">
             <p className="text-gray-400">
               Don't have an account?{' '}
-              <a href="/signup" className="text-indigo-400 hover:text-indigo-300">
+              <a href="/signup" className="text-indigo-400 hover:text-indigo-300 touch-target">
                 Sign up
               </a>
             </p>
