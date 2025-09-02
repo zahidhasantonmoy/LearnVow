@@ -1,9 +1,10 @@
-// Enhanced BookCard component with improved mobile responsiveness
+// Enhanced BookCard component with image optimization
 'use client';
 
 import { motion } from 'framer-motion';
 import { FiBook, FiHeadphones } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
+import ImageOptimization from '@/components/ImageOptimization';
 
 interface BookCardProps {
   id: number;
@@ -32,11 +33,11 @@ export default function BookCard({
     >
       <div className="relative aspect-[2/3]">
         {coverUrl ? (
-          <img 
-            src={coverUrl} 
-            alt={title} 
+          <ImageOptimization
+            src={coverUrl}
+            alt={title}
             className="w-full h-full object-cover"
-            loading="lazy"
+            quality={80}
           />
         ) : (
           <div className="bg-gray-700 w-full h-full flex items-center justify-center">

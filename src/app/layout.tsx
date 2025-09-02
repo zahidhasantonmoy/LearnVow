@@ -1,9 +1,10 @@
-// Updated root layout with PWA support
+// Updated root layout with accessibility toolbar
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import Navbar from '@/components/Navbar';
+import AccessibilityToolbar from '@/components/AccessibilityToolbar';
 
 export const metadata: Metadata = {
   title: 'LearnVow - Modern Reading Platform',
@@ -39,10 +40,14 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <CartProvider>
+            <a href="#main-content" className="skip-link">
+              Skip to main content
+            </a>
             <Navbar />
-            <div className="min-h-screen">
+            <div className="min-h-screen" id="main-content">
               {children}
             </div>
+            <AccessibilityToolbar />
           </CartProvider>
         </AuthProvider>
       </body>
