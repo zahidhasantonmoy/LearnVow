@@ -1,4 +1,4 @@
-// Gift card generator component
+// Gift card generator component with fixed Input usage
 'use client';
 
 import { useState } from 'react';
@@ -137,7 +137,6 @@ export default function GiftCardGenerator() {
           placeholder="friend@example.com"
           value={recipientEmail}
           onChange={(e) => setRecipientEmail(e.target.value)}
-          icon={<FiMail />}
         />
         
         <Input
@@ -146,7 +145,6 @@ export default function GiftCardGenerator() {
           placeholder="Your name"
           value={senderName}
           onChange={(e) => setSenderName(e.target.value)}
-          icon={<FiUser />}
         />
         
         <div>

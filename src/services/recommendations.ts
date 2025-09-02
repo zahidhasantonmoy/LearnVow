@@ -1,4 +1,4 @@
-// AI-powered recommendations service
+// AI-powered recommendations service with fixed syntax
 'use client';
 
 import { supabase } from '@/lib/supabaseClient';
@@ -210,7 +210,7 @@ export class RecommendationService {
         ...contentBased.map(book => ({ ...book, source: 'content' })),
         ...collaborative.map(book => ({ ...book, source: 'collaborative' })),
         ...trending.map(book => ({ ...book, source: 'trending' })),
-        ...popular.map(book => ({ ...book, source: 'popular' })
+        ...popular.map(book => ({ ...book, source: 'popular' }))
       ];
       
       // Deduplicate by book ID

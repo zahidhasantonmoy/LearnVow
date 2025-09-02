@@ -1,4 +1,4 @@
-// Content management form component
+// Content management form component with fixed types
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -43,7 +43,10 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
     duration: 0,
     language: 'en',
     tags: '',
-    is_active: true
+    is_active: true,
+    cover_url: '',
+    file_urls: '{}',
+    sample_url: ''
   });
   
   const [authors, setAuthors] = useState<Author[]>([]);
@@ -96,7 +99,10 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
           duration: content.duration || 0,
           language: content.language || 'en',
           tags: content.tags?.join(', ') || '',
-          is_active: content.is_active
+          is_active: content.is_active,
+          cover_url: content.cover_url || '',
+          file_urls: JSON.stringify(content.file_urls) || '{}',
+          sample_url: content.sample_url || ''
         });
         
         if (content.cover_url) {
@@ -109,7 +115,7 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value, type } = e.target as HTMLInputElement;
     
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
@@ -127,6 +133,9 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
       const reader = new FileReader();
       reader.onloadend = () => {
         setCoverPreview(reader.result as string);
+        // In a real implementation, you would upload the file to storage
+        // and set the cover_url to the storage URL
+        setFormData(prev => ({ ...prev, cover_url: 'temp-preview-url' }));
       };
       reader.readAsDataURL(file);
     }
@@ -137,8 +146,10 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
     setLoading(true);
     
     try {
+      // Parse file_urls back to object
       const contentData = {
         ...formData,
+        file_urls: JSON.parse(formData.file_urls || '{}'),
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
       };
       
@@ -169,7 +180,10 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
             duration: 0,
             language: 'en',
             tags: '',
-            is_active: true
+            is_active: true,
+            cover_url: '',
+            file_urls: '{}',
+            sample_url: ''
           });
           setCoverPreview(null);
           onSuccess?.();
@@ -237,7 +251,7 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
                 name="price"
                 type="number"
                 step="0.01"
-                value={formData.price}
+                value={formData.price.toString()}
                 onChange={handleChange}
                 required
               />
@@ -248,7 +262,7 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
                 label="Author"
                 name="author_id"
                 type="select"
-                value={formData.author_id}
+                value={formData.author_id.toString()}
                 onChange={handleChange}
                 required
               >
@@ -264,7 +278,7 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
                 label="Category"
                 name="category_id"
                 type="select"
-                value={formData.category_id}
+                value={formData.category_id.toString()}
                 onChange={handleChange}
                 required
               >
@@ -281,7 +295,7 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
               label="Publisher"
               name="publisher_id"
               type="select"
-              value={formData.publisher_id}
+              value={formData.publisher_id.toString()}
               onChange={handleChange}
             >
               <option value="">Select Publisher</option>
@@ -336,7 +350,7 @@ export default function ContentForm({ contentId, onSuccess }: ContentFormProps) 
                 label={formData.content_type === 'ebook' ? 'Pages' : 'Duration (seconds)'}
                 name={formData.content_type === 'ebook' ? 'pages' : 'duration'}
                 type="number"
-                value={formData.content_type === 'ebook' ? formData.pages : formData.duration}
+                value={formData.content_type === 'ebook' ? formData.pages.toString() : formData.duration.toString()}
                 onChange={handleChange}
               />
               

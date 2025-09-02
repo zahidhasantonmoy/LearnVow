@@ -1,4 +1,4 @@
-// Reviews component for displaying and submitting book reviews
+// Reviews component for displaying and submitting book reviews with fixed data structure
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { FiStar, FiUser } from 'react-icons/fi';
+import Link from 'next/link';
 
 interface Review {
   id: number;
@@ -16,7 +17,7 @@ interface Review {
   title: string;
   review: string;
   created_at: string;
-  profiles: {
+  profiles?: {
     username: string;
     avatar_url: string;
   } | null;
@@ -77,7 +78,9 @@ function ReviewForm({ contentId, onReviewSubmitted }: ReviewFormProps) {
     return (
       <div className="text-center py-6">
         <p className="text-gray-400 mb-4">Please sign in to leave a review</p>
-        <Button href="/login">Sign In</Button>
+        <Link href="/login" passHref>
+          <Button>Sign In</Button>
+        </Link>
       </div>
     );
   }
@@ -188,7 +191,13 @@ function ReviewsList({ contentId }: ReviewsListProps) {
       
       if (error) throw error;
       
-      setReviews(data || []);
+      // Fix the data structure to match our interface
+      const fixedData = data?.map((item: any) => ({
+        ...item,
+        profiles: item.profiles ? item.profiles[0] : null
+      })) || [];
+      
+      setReviews(fixedData);
     } catch (error) {
       console.error('Error fetching reviews:', error);
     } finally {

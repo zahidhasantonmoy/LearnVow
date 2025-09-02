@@ -1,58 +1,29 @@
-// Enhanced responsive navigation component
+// Navbar component with fixed icon imports
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
-import { 
-  FiMenu, 
-  FiX, 
-  FiBook, 
-  FiHeadphones, 
-  FiShoppingCart, 
-  FiUser, 
-  FiLogIn, 
-  FiLogOut,
-  FiHome,
-  FiLibrary,
-  FiSettings
-} from 'react-icons/fi';
+import { FiMenu, FiX, FiBook, FiHeadphones, FiShoppingCart, FiUser, FiLogIn, FiLogOut, FiHome } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { user, signOut } = useAuth();
   const { cartCount } = useCart();
 
-  // Handle scroll effect for navbar
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Close menu when route changes
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
-
   const navLinks = [
     { name: 'Home', href: '/', icon: <FiHome /> },
     { name: 'Books', href: '/books', icon: <FiBook /> },
-    { name: 'Library', href: '/dashboard', icon: <FiLibrary /> },
+    { name: 'Library', href: '/dashboard', icon: <FiHeadphones /> },
   ];
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      setIsMenuOpen(false);
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -60,9 +31,7 @@ export default function Navbar() {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-gray-900/90 backdrop-blur-md py-2 shadow-lg' : 'bg-gray-900/80 py-3'
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 py-3"
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">

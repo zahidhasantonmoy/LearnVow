@@ -1,14 +1,15 @@
-// Shopping cart context
+// Cart context with fixed syntax and cover_url
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-interfaceCartItem {
+interface CartItem {
   id: number;
   title: string;
   price: number;
   quantity: number;
   contentType: 'ebook' | 'audiobook';
+  cover_url?: string;
 }
 
 interface CartContextType {

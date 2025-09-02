@@ -1,4 +1,4 @@
-// Caching service for performance optimizations
+// Caching service for performance optimizations with fixed iteration
 'use client';
 
 interface CacheItem {
@@ -43,11 +43,19 @@ class CacheService {
   // Clear expired items
   clearExpired(): void {
     const now = Date.now();
-    for (const [key, item] of this.cache.entries()) {
+    const keysToDelete: string[] = [];
+    
+    // Collect keys to delete
+    this.cache.forEach((item, key) => {
       if (now > item.expiry) {
-        this.cache.delete(key);
+        keysToDelete.push(key);
       }
-    }
+    });
+    
+    // Delete collected keys
+    keysToDelete.forEach(key => {
+      this.cache.delete(key);
+    });
   }
   
   // Clear all items

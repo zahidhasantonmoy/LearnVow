@@ -1,4 +1,4 @@
-// Subscriptions component for managing user subscriptions
+// Subscriptions component for managing user subscriptions with fixed data structure
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,13 +30,13 @@ interface UserSubscription {
   cancel_date: string;
   auto_renew: boolean;
   created_at: string;
-  subscription_plans: {
+  subscription_plans?: {
     name: string;
     price: number;
     interval: string;
     features: any;
     max_books: number;
-  };
+  } | null;
 }
 
 export default function Subscriptions() {

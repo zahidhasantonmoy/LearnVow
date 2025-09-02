@@ -1,4 +1,4 @@
-// Enhanced Shopping cart page with improved mobile responsiveness
+// Shopping cart page with fixed Button component usage
 'use client';
 
 import { useState } from 'react';
@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import Link from 'next/link';
 import { FiBook, FiHeadphones, FiTrash2 } from 'react-icons/fi';
 
 interface CartItem {
@@ -44,9 +45,11 @@ export default function Cart() {
             <Card className="text-center py-12">
               <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
               <p className="text-gray-400 mb-6">Add some books to your cart to get started</p>
-              <Button variant="secondary" href="/books" className="touch-target">
-                Browse Books
-              </Button>
+              <Link href="/books">
+                <Button variant="secondary" className="touch-target">
+                  Browse Books
+                </Button>
+              </Link>
             </Card>
           ) : (
             <div className="flex flex-col lg:flex-row gap-8">
@@ -140,13 +143,14 @@ export default function Cart() {
                     {checkoutLoading ? 'Processing...' : 'Proceed to Checkout'}
                   </Button>
                   
-                  <Button 
-                    variant="outline" 
-                    className="w-full mt-3 touch-target"
-                    href="/books"
-                  >
-                    Continue Shopping
-                  </Button>
+                  <Link href="/books">
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-3 touch-target"
+                    >
+                      Continue Shopping
+                    </Button>
+                  </Link>
                 </Card>
               </div>
             </div>

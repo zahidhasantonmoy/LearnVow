@@ -1,4 +1,4 @@
-// Recommendations component for displaying AI-powered book suggestions
+// Recommendations component for displaying AI-powered book suggestions with fixed icons
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -69,7 +69,7 @@ export default function Recommendations() {
   const getSourceIcon = (source: string) => {
     switch (source) {
       case 'content': return <FiHeart className="text-red-500" />;
-      case 'collaborative': return <FiUsers className="text-blue-500" />;
+      case 'collaborative': return <FiStar className="text-blue-500" />;
       case 'trending': return <FiTrendingUp className="text-yellow-500" />;
       default: return <FiStar className="text-indigo-500" />;
     }
