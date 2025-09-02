@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiBook, FiHeadphones, FiStar, FiBookmark, FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
+import { FiBook, FiHeadphones, FiStar, FiBookmark, FiUser, FiLogOut, FiSettings, FiShoppingCart } from 'react-icons/fi';
 import styles from './library.module.css';
 
 export default function Library() {
