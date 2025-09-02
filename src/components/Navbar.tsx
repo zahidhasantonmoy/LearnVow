@@ -1,4 +1,4 @@
-// Navbar component with fixed icon imports
+// Navbar component for main site
 'use client';
 
 import { useState } from 'react';
@@ -30,9 +30,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav 
-      className="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 py-3"
-    >
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 py-3 backdrop-blur-md border-b border-gray-800">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
