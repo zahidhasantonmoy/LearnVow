@@ -37,13 +37,22 @@ export default function Books() {
     try {
       const { data, error } = await supabase
         .from('content')
-        .select('*')
+        .select(`
+          *,
+          authors(name)
+        `)
         .eq('is_active', true);
       
       if (error) throw error;
       
-      setBooks(data);
-      setFilteredBooks(data);
+      // Map the data to include author name directly
+      const booksWithAuthors = data.map(book => ({
+        ...book,
+        author: book.authors?.name || 'Unknown Author'
+      }));
+      
+      setBooks(booksWithAuthors);
+      setFilteredBooks(booksWithAuthors);
     } catch (error) {
       console.error('Error fetching books:', error);
     } finally {
