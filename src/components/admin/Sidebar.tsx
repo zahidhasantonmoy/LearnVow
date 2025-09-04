@@ -13,7 +13,8 @@ import {
   FiSettings, 
   FiBarChart2, 
   FiGift, 
-  FiMessageSquare 
+  FiMessageSquare,
+  FiUser as FiUserProfile
 } from 'react-icons/fi';
 
 export default function Sidebar() {
@@ -30,6 +31,7 @@ export default function Sidebar() {
     { name: 'Gift Cards', href: '/admin/gift-cards', icon: FiGift },
     { name: 'Analytics', href: '/admin/analytics', icon: FiBarChart2 },
     { name: 'Settings', href: '/admin/settings', icon: FiSettings },
+    { name: 'Profile', href: '/admin/profile', icon: FiUserProfile },
   ];
 
   return (
