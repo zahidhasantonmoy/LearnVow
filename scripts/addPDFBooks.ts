@@ -1,5 +1,15 @@
 // Script to add PDF books to the database
-import { supabase } from '../lib/supabaseClient';
+import { createClient } from '@supabase/supabase-js';
+
+// Ensure these environment variables are set
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://htvficmfwlkxaoxgsslc.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dmZpY21md2xreGFveGdzc2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MzIyMTYsImV4cCI6MjA3MjMwODIxNn0.e03QaHrUvAKdqRVoC9C5P_PhWCNVx5blVVa1YQtL2PE';
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function addPDFBooks() {
   console.log('Starting to add PDF books to database...');
@@ -23,7 +33,7 @@ async function addPDFBooks() {
     if (error) {
       console.error('Error adding author:', error);
     } else {
-      console.log('Added/updated author:', data[0]);
+      console.log('Added/updated author:', data?.[0]);
     }
   }
 
@@ -33,10 +43,12 @@ async function addPDFBooks() {
     .select('id, name')
     .in('name', authors.map(a => a.name));
 
-  const authorMap = {};
-  authorData.forEach(author => {
-    authorMap[author.name] = author.id;
-  });
+  const authorMap: Record<string, number> = {};
+  if (authorData) {
+    authorData.forEach(author => {
+      authorMap[author.name] = author.id;
+    });
+  }
 
   // Sample categories (if they don't exist)
   const categories = [
@@ -61,7 +73,7 @@ async function addPDFBooks() {
     if (error) {
       console.error('Error adding category:', error);
     } else {
-      console.log('Added/updated category:', data[0]);
+      console.log('Added/updated category:', data?.[0]);
     }
   }
 
@@ -71,10 +83,12 @@ async function addPDFBooks() {
     .select('id, slug')
     .in('slug', categories.map(c => c.slug));
 
-  const categoryMap = {};
-  categoryData.forEach(category => {
-    categoryMap[category.slug] = category.id;
-  });
+  const categoryMap: Record<string, number> = {};
+  if (categoryData) {
+    categoryData.forEach(category => {
+      categoryMap[category.slug] = category.id;
+    });
+  }
 
   // Sample publishers (if they don't exist)
   const publishers = [
@@ -92,7 +106,7 @@ async function addPDFBooks() {
     if (error) {
       console.error('Error adding publisher:', error);
     } else {
-      console.log('Added/updated publisher:', data[0]);
+      console.log('Added/updated publisher:', data?.[0]);
     }
   }
 
@@ -102,10 +116,12 @@ async function addPDFBooks() {
     .select('id, name')
     .in('name', publishers.map(p => p.name));
 
-  const publisherMap = {};
-  publisherData.forEach(publisher => {
-    publisherMap[publisher.name] = publisher.id;
-  });
+  const publisherMap: Record<string, number> = {};
+  if (publisherData) {
+    publisherData.forEach(publisher => {
+      publisherMap[publisher.name] = publisher.id;
+    });
+  }
 
   // Books data
   const books = [
@@ -204,7 +220,7 @@ async function addPDFBooks() {
     if (error) {
       console.error('Error adding book:', error);
     } else {
-      console.log('Added/updated book:', data[0]);
+      console.log('Added/updated book:', data?.[0]);
     }
   }
 
