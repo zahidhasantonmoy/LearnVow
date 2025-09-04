@@ -45,14 +45,17 @@ export default function Books() {
       
       if (error) throw error;
       
+      console.log('Raw data from Supabase:', data);
+      
       // Map the data to include author name directly
       const booksWithAuthors = data.map(book => ({
         ...book,
         author: book.authors?.name || 'Unknown Author'
       }));
       
+      console.log('Processed books:', booksWithAuthors);
+      
       setBooks(booksWithAuthors);
-      setFilteredBooks(booksWithAuthors);
     } catch (error) {
       console.error('Error fetching books:', error);
     } finally {
@@ -61,6 +64,7 @@ export default function Books() {
   };
 
   const filterAndSortBooks = () => {
+    console.log('Filtering books:', books);
     let result = [...books];
     
     // Filter by search term
@@ -90,6 +94,7 @@ export default function Books() {
         break;
     }
     
+    console.log('Filtered books:', result);
     setFilteredBooks(result);
   };
 
