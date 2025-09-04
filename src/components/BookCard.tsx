@@ -1,6 +1,7 @@
 // Enhanced BookCard component with image optimization
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiBook, FiHeadphones } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
@@ -31,7 +32,7 @@ export default function BookCard({
       transition={{ type: "spring", stiffness: 300 }}
       className="bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-indigo-500 transition-all duration-300 card-hover h-full flex flex-col"
     >
-      <div className="relative aspect-[2/3]">
+      <Link href={`/books/${id}`} className="relative aspect-[2/3] block">
         {coverUrl ? (
           <ImageOptimization
             src={coverUrl}
@@ -49,10 +50,14 @@ export default function BookCard({
         <div className="absolute top-2 right-2 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded">
           {contentType === 'ebook' ? 'Ebook' : 'Audiobook'}
         </div>
-      </div>
+      </Link>
       
       <div className="p-4 flex-1 flex flex-col">
-        <h3 className="font-bold text-lg mb-1 line-clamp-2 flex-1">{title}</h3>
+        <h3 className="font-bold text-lg mb-1 line-clamp-2 flex-1">
+          <Link href={`/books/${id}`} className="hover:text-indigo-400 transition-colors">
+            {title}
+          </Link>
+        </h3>
         <p className="text-gray-400 text-sm mb-3">by {author}</p>
         
         <div className="flex justify-between items-center mt-auto">
