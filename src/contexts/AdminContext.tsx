@@ -39,6 +39,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const checkAuthStatus = async () => {
     try {
+      console.log('Checking admin auth status...');
       // Check for existing admin session
       const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
         const [name, value] = cookie.split('=');
@@ -47,6 +48,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       }, {} as Record<string, string>);
       
       const sessionId = cookies.admin_session;
+      console.log('Session ID from cookie:', sessionId);
       
       if (sessionId) {
         // Validate session with backend
@@ -57,8 +59,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           .gt('expires_at', new Date().toISOString())
           .single();
         
+        console.log('Session validation result:', { data, error });
+        
         if (!error && data) {
           const userData = data.admin_users;
+          console.log('User data:', userData);
           if (userData && userData.is_active) {
             setUser({
               id: userData.id,
@@ -71,30 +76,41 @@ export function AdminProvider({ children }: { children: ReactNode }) {
               updated_at: userData.updated_at
             });
             setIsAuthenticated(true);
+            console.log('Admin authenticated successfully');
             
             // Update last activity
             await supabase
               .from('admin_users')
               .update({ last_login: new Date().toISOString() })
               .eq('id', userData.id);
+          } else {
+            console.log('User not active or no user data');
           }
+        } else {
+          console.log('Session validation failed:', error);
         }
+      } else {
+        console.log('No session ID found in cookies');
       }
     } catch (error) {
       console.error('Error checking admin auth status:', error);
     } finally {
       setLoading(false);
+      console.log('Finished checking admin auth status');
     }
   };
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('Attempting admin login for:', email);
       // Hash password for comparison (in a real app, this would be server-side)
       const encoder = new TextEncoder();
       const data = encoder.encode(password);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      console.log('Hashed password:', hashedPassword);
       
       // Check credentials
       const { data: userData, error } = await supabase
@@ -104,6 +120,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         .eq('password_hash', hashedPassword)
         .eq('is_active', true)
         .single();
+      
+      console.log('Login result:', { userData, error });
       
       if (error) {
         return { success: false, error: 'Invalid credentials' };
@@ -128,6 +146,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       
       // Set session cookie
       document.cookie = `admin_session=${sessionId}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+      console.log('Set session cookie:', sessionId);
       
       // Update user state
       setUser({
@@ -157,6 +176,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
+      console.log('Logging out admin user');
       // Get session ID from cookie
       const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
         const [name, value] = cookie.split('=');
