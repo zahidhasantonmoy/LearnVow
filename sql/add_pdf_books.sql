@@ -2,12 +2,21 @@
 -- This script can be run directly in the Supabase SQL editor
 
 -- First, let's check if our authors exist, and if not, add them
-INSERT INTO authors (name, bio) VALUES
-  ('TechAI Google', 'Leading experts in AI and technology'),
-  ('Simon Kingsnorth', 'Digital marketing expert and author'),
-  ('David J. Eck', 'Computer science professor and educator'),
-  ('Unknown Author', 'Technical documentation specialist')
-ON CONFLICT (name) DO NOTHING;
+INSERT INTO authors (name, bio) 
+SELECT 'TechAI Google', 'Leading experts in AI and technology'
+WHERE NOT EXISTS (SELECT 1 FROM authors WHERE name = 'TechAI Google');
+
+INSERT INTO authors (name, bio) 
+SELECT 'Simon Kingsnorth', 'Digital marketing expert and author'
+WHERE NOT EXISTS (SELECT 1 FROM authors WHERE name = 'Simon Kingsnorth');
+
+INSERT INTO authors (name, bio) 
+SELECT 'David J. Eck', 'Computer science professor and educator'
+WHERE NOT EXISTS (SELECT 1 FROM authors WHERE name = 'David J. Eck');
+
+INSERT INTO authors (name, bio) 
+SELECT 'Unknown Author', 'Technical documentation specialist'
+WHERE NOT EXISTS (SELECT 1 FROM authors WHERE name = 'Unknown Author');
 
 -- Check if our categories exist, and if not, add them
 INSERT INTO categories (name, slug, description) VALUES
@@ -18,9 +27,9 @@ INSERT INTO categories (name, slug, description) VALUES
 ON CONFLICT (slug) DO NOTHING;
 
 -- Check if our publisher exists, and if not, add it
-INSERT INTO publishers (name, website) VALUES
-  ('LearnVow Publications', 'https://learnvow.com')
-ON CONFLICT (name) DO NOTHING;
+INSERT INTO publishers (name, website) 
+SELECT 'LearnVow Publications', 'https://learnvow.com'
+WHERE NOT EXISTS (SELECT 1 FROM publishers WHERE name = 'LearnVow Publications');
 
 -- Now add our PDF books
 -- We'll use WHERE NOT EXISTS to avoid duplicates since there's no unique constraint on title
