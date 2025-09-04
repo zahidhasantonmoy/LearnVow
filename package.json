@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "add-books": "ts-node scripts/addPDFBooks.ts"
+    "add-books": "ts-node -P tsconfig.scripts.json scripts/addPDFBooks.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.32.0",
