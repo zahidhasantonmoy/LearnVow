@@ -23,7 +23,7 @@ INSERT INTO publishers (name, website) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- Now add our PDF books
--- We'll use INSERT ... ON CONFLICT DO NOTHING with the title as the conflict target
+-- We'll use WHERE NOT EXISTS to avoid duplicates since there's no unique constraint on title
 INSERT INTO content (title, subtitle, description, content_type, price, author_id, category_id, publisher_id, pages, language, file_urls, sample_url, is_active) 
 SELECT 'Prompt Engineering', 'TechAI Google Whitepaper', 'A comprehensive guide to prompt engineering techniques for AI models. This whitepaper explores advanced methods for crafting effective prompts that yield better results from language models.', 'ebook', 12.99, 
    (SELECT id FROM authors WHERE name = 'TechAI Google'), 
@@ -33,7 +33,7 @@ SELECT 'Prompt Engineering', 'TechAI Google Whitepaper', 'A comprehensive guide 
    '{"full": "/content/books/2025-01-18-pdf-1-TechAI-Goolge-whitepaper_Prompt Engineering_v4-af36dcc7a49bb7269a58b1c9b89a8ae1.pdf", "sample": "/content/books/2025-01-18-pdf-1-TechAI-Goolge-whitepaper_Prompt Engineering_v4-af36dcc7a49bb7269a58b1c9b89a8ae1.pdf"}',
    '/content/books/2025-01-18-pdf-1-TechAI-Goolge-whitepaper_Prompt Engineering_v4-af36dcc7a49bb7269a58b1c9b89a8ae1.pdf', 
    true
-ON CONFLICT (title) DO NOTHING;
+WHERE NOT EXISTS (SELECT 1 FROM content WHERE title = 'Prompt Engineering');
 
 INSERT INTO content (title, subtitle, description, content_type, price, author_id, category_id, publisher_id, pages, language, file_urls, sample_url, is_active) 
 SELECT 'Digital Marketing Strategy', 'An Integrated Approach to Online Marketing', 'This book provides a comprehensive approach to digital marketing strategy. It covers all aspects of online marketing including SEO, social media, content marketing, and analytics to help businesses thrive in the digital landscape.', 'ebook', 14.99, 
@@ -44,7 +44,7 @@ SELECT 'Digital Marketing Strategy', 'An Integrated Approach to Online Marketing
    '{"full": "/content/books/Digital Marketing Strategy An Integrated Approach to Online Marketing by Simon Kingsnorth (z-lib.org).pdf", "sample": "/content/books/Digital Marketing Strategy An Integrated Approach to Online Marketing by Simon Kingsnorth (z-lib.org).pdf"}',
    '/content/books/Digital Marketing Strategy An Integrated Approach to Online Marketing by Simon Kingsnorth (z-lib.org).pdf', 
    true
-ON CONFLICT (title) DO NOTHING;
+WHERE NOT EXISTS (SELECT 1 FROM content WHERE title = 'Digital Marketing Strategy');
 
 INSERT INTO content (title, subtitle, description, content_type, price, author_id, category_id, publisher_id, pages, language, file_urls, sample_url, is_active) 
 SELECT 'Java Notes', 'Introduction to Programming', 'A comprehensive introduction to programming using Java. This textbook covers fundamental programming concepts, object-oriented programming, data structures, and algorithms for beginners.', 'ebook', 9.99, 
@@ -55,7 +55,7 @@ SELECT 'Java Notes', 'Introduction to Programming', 'A comprehensive introductio
    '{"full": "/content/books/javanotes5.pdf", "sample": "/content/books/javanotes5.pdf"}',
    '/content/books/javanotes5.pdf', 
    true
-ON CONFLICT (title) DO NOTHING;
+WHERE NOT EXISTS (SELECT 1 FROM content WHERE title = 'Java Notes');
 
 INSERT INTO content (title, subtitle, description, content_type, price, author_id, category_id, publisher_id, pages, language, file_urls, sample_url, is_active) 
 SELECT 'EDIT Tutorial', 'Step-by-Step Guide', 'A practical tutorial covering essential techniques and best practices. This guide provides hands-on examples and exercises to help readers master the subject through practical application.', 'ebook', 7.99, 
@@ -66,4 +66,4 @@ SELECT 'EDIT Tutorial', 'Step-by-Step Guide', 'A practical tutorial covering ess
    '{"full": "/content/books/Tutorial_EDIT.pdf", "sample": "/content/books/Tutorial_EDIT.pdf"}',
    '/content/books/Tutorial_EDIT.pdf', 
    true
-ON CONFLICT (title) DO NOTHING;
+WHERE NOT EXISTS (SELECT 1 FROM content WHERE title = 'EDIT Tutorial');
