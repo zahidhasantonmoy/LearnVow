@@ -52,6 +52,16 @@ export default function BookDetail({ params }: { params: { id: string } }) {
 
   const fetchBook = async () => {
     try {
+      console.log('Fetching book with ID:', params.id);
+      const bookId = parseInt(params.id);
+      console.log('Parsed book ID:', bookId);
+      
+      if (isNaN(bookId)) {
+        console.error('Invalid book ID:', params.id);
+        setLoading(false);
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('content')
         .select(`
@@ -60,10 +70,19 @@ export default function BookDetail({ params }: { params: { id: string } }) {
           categories(name),
           publishers(name)
         `)
-        .eq('id', params.id)
+        .eq('id', bookId)
         .single();
 
+      console.log('Supabase response:', { data, error });
+      
       if (error) throw error;
+      
+      // Check if book exists
+      if (!data) {
+        console.log('No book found with ID:', bookId);
+        setLoading(false);
+        return;
+      }
 
       // Format the book data
       const formattedBook = {
@@ -74,6 +93,8 @@ export default function BookDetail({ params }: { params: { id: string } }) {
         file_urls: data.file_urls ? JSON.parse(data.file_urls) : null
       };
 
+      console.log('Formatted book:', formattedBook);
+      
       setBook(formattedBook);
       
       // Set PDF URL based on user status
