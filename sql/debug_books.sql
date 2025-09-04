@@ -20,4 +20,7 @@ SELECT 'all_content' as table_name, id, title, author_id, category_id, publisher
 SELECT 'all_authors' as table_name, id, name FROM authors;
 
 -- Check the structure of the content table
-\d content;
+SELECT column_name, data_type, is_nullable 
+FROM information_schema.columns 
+WHERE table_name = 'content' 
+ORDER BY ordinal_position;
