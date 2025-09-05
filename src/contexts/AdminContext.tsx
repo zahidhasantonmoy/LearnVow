@@ -1,8 +1,7 @@
-// Admin context provider
+// Simplified Admin context provider
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 interface AdminUser {
@@ -59,7 +58,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           id: 1,
           email: 'admin@learnvow.com',
           full_name: 'Administrator',
-          role: 'admin' as 'admin' | 'editor' | 'viewer',
+          role: 'admin',
           is_active: true,
           last_login: new Date().toISOString(),
           created_at: new Date().toISOString(),
@@ -83,15 +82,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       console.log('Attempting admin login for:', email);
-      // For demo purposes, we'll check against a hardcoded password
-      // In a real application, this should be handled server-side with proper password hashing
+      // Simplified authentication - just check credentials
       if (email === 'admin@learnvow.com' && password === 'admin123') {
         // Mock user data for successful login
         const mockUserData = {
           id: 1,
           email: 'admin@learnvow.com',
           full_name: 'Administrator',
-          role: 'admin' as 'admin' | 'editor' | 'viewer',
+          role: 'admin',
           is_active: true,
           last_login: new Date().toISOString(),
           created_at: new Date().toISOString(),
@@ -103,8 +101,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7); // 7-day session
         
-        // In a real app, we would store this in the database
-        // For now, we'll just set the cookie
+        // Set session cookie
         document.cookie = `admin_session=${sessionId}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
         console.log('Set session cookie:', sessionId);
         
@@ -125,23 +122,6 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       console.log('Logging out admin user');
-      // Get session ID from cookie
-      const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
-        const [name, value] = cookie.split('=');
-        acc[name] = value;
-        return acc;
-      }, {} as Record<string, string>);
-      
-      const sessionId = cookies.admin_session;
-      
-      if (sessionId) {
-        // Delete session from database
-        await supabase
-          .from('admin_sessions')
-          .delete()
-          .eq('id', sessionId);
-      }
-      
       // Clear session cookie
       document.cookie = `admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
       

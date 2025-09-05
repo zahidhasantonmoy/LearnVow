@@ -1,4 +1,4 @@
-// Admin layout with authentication
+// Simplified Admin layout with authentication
 'use client';
 
 import { useAdmin } from '@/contexts/AdminContext';
@@ -15,19 +15,6 @@ export default function AdminLayout({
   const { isAuthenticated, loading } = useAdmin();
   const router = useRouter();
 
-  // Redirect to login if not authenticated and not loading
-  if (!loading && !isAuthenticated) {
-    router.push('/admin/login');
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <FiLoader className="animate-spin text-4xl text-indigo-500 mx-auto mb-4" />
-          <p className="text-gray-400">Redirecting to login...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Show loading state while checking authentication
   if (loading) {
     return (
@@ -35,6 +22,24 @@ export default function AdminLayout({
         <div className="text-center">
           <FiLoader className="animate-spin text-4xl text-indigo-500 mx-auto mb-4" />
           <p className="text-gray-400">Loading admin panel...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, show a simple login button instead of redirecting
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Admin Access Required</h1>
+          <p className="text-gray-400 mb-6">Please log in to access the admin panel</p>
+          <button 
+            onClick={() => router.push('/admin/login')}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+          >
+            Go to Login
+          </button>
         </div>
       </div>
     );
