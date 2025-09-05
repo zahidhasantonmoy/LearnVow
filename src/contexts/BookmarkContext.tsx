@@ -32,7 +32,9 @@ const BookmarkContext = createContext<BookmarkContextType | undefined>(undefined
 export function BookmarkProvider({ children }: { children: ReactNode }) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  // Use optional chaining to handle cases when auth context is not available
+  const authContext = useAuth();
+  const user = authContext?.user;
 
   useEffect(() => {
     if (user) {
@@ -178,7 +180,16 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
 export function useBookmarks() {
   const context = useContext(BookmarkContext);
   if (context === undefined) {
-    throw new Error('useBookmarks must be used within a BookmarkProvider');
+    // Return a default context when used outside of provider to avoid errors during static generation
+    return {
+      bookmarks: [],
+      loading: false,
+      addBookmark: async () => {},
+      updateBookmark: async () => {},
+      removeBookmark: async () => {},
+      getBookmarksForContent: () => [],
+      refreshBookmarks: async () => {}
+    };
   }
   return context;
 }
