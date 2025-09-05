@@ -42,6 +42,8 @@ export default function BookDetail({ params }: { params: { id: string } }) {
   const [showFullPdf, setShowFullPdf] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
+  
+  console.log('BookDetail component loaded with params:', params);
 
   useEffect(() => {
     fetchBook();
