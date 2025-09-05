@@ -25,11 +25,13 @@ export default function AdminLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted with:', { email, password });
     setLoading(true);
     setError('');
 
     try {
       const result = await login(email, password);
+      console.log('Login result:', result);
       
       if (result.success) {
         router.push('/admin');
@@ -37,6 +39,7 @@ export default function AdminLogin() {
         setError(result.error || 'Login failed');
       }
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || 'An error occurred during login');
     } finally {
       setLoading(false);
@@ -66,7 +69,10 @@ export default function AdminLogin() {
             type="email"
             placeholder="admin@learnvow.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              console.log('Email changed to:', e.target.value);
+              setEmail(e.target.value);
+            }}
             required
           />
           
@@ -75,7 +81,10 @@ export default function AdminLogin() {
             type="password"
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              console.log('Password changed to:', e.target.value);
+              setPassword(e.target.value);
+            }}
             required
           />
           
