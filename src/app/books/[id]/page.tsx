@@ -7,12 +7,13 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmarks } from '@/contexts/BookmarkContext';
 import { useReadingStats } from '@/contexts/ReadingStatsContext';
+import { useOffline } from '@/contexts/OfflineContext';
 import ReadingContent from '@/components/ReadingContent';
 import TextCustomizationControls from '@/components/TextCustomizationControls';
 import BookmarkButton from '@/components/BookmarkButton';
 import BookmarkNoteModal from '@/components/BookmarkNoteModal';
 import Button from '@/components/ui/Button';
-import { FiDownload, FiHeart, FiShare2, FiStar, FiBook, FiFile, FiBookmark, FiClock } from 'react-icons/fi';
+import { FiDownload, FiHeart, FiShare2, FiStar, FiBook, FiFile, FiBookmark, FiClock, FiWifiOff } from 'react-icons/fi';
 
 interface Book {
   id: number;
@@ -49,17 +50,37 @@ export default function BookDetail({ params }: { params: { id: string } }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isBookmarkModalOpen, setIsBookmarkModalOpen] = useState(false);
   const [readingTime, setReadingTime] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { user } = useAuth();
   const { bookmarks, addBookmark } = useBookmarks();
   const { addReadingTime } = useReadingStats();
+  const { isSupported, downloadBook, isBookDownloaded } = useOffline();
   const router = useRouter();
   const readingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number | null>(null);
   
   console.log('BookDetail component loaded with params:', params);
 
-  // Track reading time
-  useEffect(() => {
+  const handleDownloadForOffline = async () => {
+    if (!book || !isSupported) return;
+    
+    setIsDownloading(true);
+    
+    try {
+      await downloadBook(parseInt(params.id), {
+        title: book.title,
+        author: book.author?.name || 'Unknown Author',
+        cover_url: book.cover_url || '',
+        content_type: book.content_type,
+        file_url: book.file_urls?.full || book.sample_url || '',
+        file_size: 0 // In a real implementation, we would get the actual file size
+      });
+    } catch (error) {
+      console.error('Error downloading book for offline use:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
     if (showFullPdf && user) {
       // Start timer when PDF is shown
       startTimeRef.current = Date.now();
@@ -245,16 +266,6 @@ export default function BookDetail({ params }: { params: { id: string } }) {
     }
 
     try {
-      if (isInLibrary) {
-        // Remove from library
-        const { error } = await supabase
-          .from('user_libraries')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('content_id', parseInt(params.id));
-        
-        if (error) throw error;
-        setIsInLibrary(false);
       } else {
         // Add to library
         const { error } = await supabase
@@ -268,8 +279,30 @@ export default function BookDetail({ params }: { params: { id: string } }) {
         setIsInLibrary(true);
       }
     } catch (error) {
-      console.error('Error updating library:', error);
+      console.error('Error toggling library:', error);
     }
+  };
+
+  const handleDownloadForOffline = async () => {
+    if (!book || !isSupported) return;
+    
+    setIsDownloading(true);
+    
+    try {
+      await downloadBook(parseInt(params.id), {
+        title: book.title,
+        author: book.author?.name || 'Unknown Author',
+        cover_url: book.cover_url || '',
+        content_type: book.content_type,
+        file_url: book.file_urls?.full || book.sample_url || '',
+        file_size: 0 // In a real implementation, we would get the actual file size
+      });
+    } catch (error) {
+      console.error('Error downloading book for offline use:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
   };
 
   if (loading) {
@@ -514,9 +547,36 @@ export default function BookDetail({ params }: { params: { id: string } }) {
                     <FiDownload className="mr-2" />
                     Download PDF
                   </Button>
-                  <p className="text-sm text-gray-400">
-                    Full access to {book.pages} pages
-                  </p>
+                  <div className="flex space-x-2">
+                    {isSupported && user && isInLibrary && (
+                      <Button 
+                        variant="outline"
+                        onClick={handleDownloadForOffline}
+                        disabled={isDownloading || isBookDownloaded(parseInt(params.id))}
+                      >
+                        {isDownloading ? (
+                          <>
+                            <FiLoader className="animate-spin mr-2" />
+                            Downloading...
+                          </>
+                        ) : isBookDownloaded(parseInt(params.id)) ? (
+                          <>
+                            <FiCheck className="mr-2" />
+                            Downloaded
+                          </>
+                        ) : (
+                          <>
+                            <FiWifiOff className="mr-2" />
+                            Offline
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    <Button variant="outline">
+                      <FiShare2 className="mr-2" />
+                      Share
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

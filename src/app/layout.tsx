@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ReadingSettingsProvider } from '@/contexts/ReadingSettingsContext';
 import { BookmarkProvider } from '@/contexts/BookmarkContext';
 import { ReadingStatsProvider } from '@/contexts/ReadingStatsContext';
+import { OfflineProvider } from '@/contexts/OfflineContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -28,19 +29,21 @@ export default function RootLayout({
           <ReadingSettingsProvider>
             <BookmarkProvider>
               <ReadingStatsProvider>
-                <AdminProvider>
-                  <AuthProvider>
-                    <CartProvider>
-                      <div className="flex flex-col min-h-screen">
-                        <Navbar />
-                        <main className="flex-grow">
-                          {children}
-                        </main>
-                        <Footer />
-                      </div>
-                    </CartProvider>
-                  </AuthProvider>
-                </AdminProvider>
+                <OfflineProvider>
+                  <AdminProvider>
+                    <AuthProvider>
+                      <CartProvider>
+                        <div className="flex flex-col min-h-screen">
+                          <Navbar />
+                          <main className="flex-grow">
+                            {children}
+                          </main>
+                          <Footer />
+                        </div>
+                      </CartProvider>
+                    </AuthProvider>
+                  </AdminProvider>
+                </OfflineProvider>
               </ReadingStatsProvider>
             </BookmarkProvider>
           </ReadingSettingsProvider>
