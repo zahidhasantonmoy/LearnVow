@@ -64,20 +64,26 @@ export default function BookDetail({ params }: { params: { id: string } }) {
         return;
       }
       
-      // First, let's check if the book exists at all
-      const { count, error: countError } = await supabase
+      // First, let's check if the book exists at all with a simple query
+      console.log('Checking if book exists with simple query...');
+      const { data: simpleData, error: simpleError } = await supabase
         .from('content')
-        .select('*', { count: 'exact', head: true })
+        .select('id, title')
         .eq('id', bookId);
       
-      console.log('Book count check:', { count, countError });
+      console.log('Simple query result:', { simpleData, simpleError });
       
-      if (countError) {
-        console.error('Error checking book count:', countError);
+      if (simpleError) {
+        console.error('Simple query error:', simpleError);
       } else {
-        console.log('Number of books with ID', bookId, ':', count);
+        console.log('Simple query found', simpleData?.length, 'books');
+        if (simpleData && simpleData.length > 0) {
+          console.log('Book exists:', simpleData[0]);
+        }
       }
       
+      // Now try the full query with joins
+      console.log('Running full query with joins...');
       const { data, error } = await supabase
         .from('content')
         .select(`
@@ -89,17 +95,17 @@ export default function BookDetail({ params }: { params: { id: string } }) {
         .eq('id', bookId)
         .single();
 
-      console.log('Supabase response:', { data, error });
+      console.log('Full query response:', { data, error });
       
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('Full query error:', error);
         setLoading(false);
         return;
       }
       
       // Check if book exists
       if (!data) {
-        console.log('No book found with ID:', bookId);
+        console.log('No book found with full query for ID:', bookId);
         setLoading(false);
         return;
       }
@@ -128,6 +134,7 @@ export default function BookDetail({ params }: { params: { id: string } }) {
     } catch (error) {
       console.error('Error fetching book:', error);
     } finally {
+      console.log('Finished fetching book, loading:', false);
       setLoading(false);
     }
   };
