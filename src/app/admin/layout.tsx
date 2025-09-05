@@ -1,9 +1,8 @@
-// Fixed Admin layout with authentication
+// Simplified Admin layout with authentication
 'use client';
 
-import { useEffect } from 'react';
-import { useAdmin } from '@/contexts/AdminContext';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import Navbar from '@/components/admin/Navbar';
 import Sidebar from '@/components/admin/Sidebar';
 import { FiLoader } from 'react-icons/fi';
@@ -13,15 +12,44 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, loading } = useAdmin();
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
-  // Redirect to login if not authenticated
+  // Check authentication status
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    const checkAuth = () => {
+      console.log('Checking admin auth in layout...');
+      // Check for existing admin session
+      const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
+        const [name, value] = cookie.split('=');
+        acc[name] = value;
+        return acc;
+      }, {} as Record<string, string>);
+      
+      const sessionId = cookies.admin_session;
+      console.log('Session ID from cookie in layout:', sessionId);
+      
+      if (sessionId) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+      
+      setLoading(false);
+    };
+    
+    checkAuth();
+  }, [pathname]);
+
+  // Redirect to login if not authenticated and not on login page
+  useEffect(() => {
+    if (!loading && !isAuthenticated && !pathname.includes('/admin/login')) {
+      console.log('Redirecting to login from layout');
       router.push('/admin/login');
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, pathname, router]);
 
   // Show loading state while checking authentication
   if (loading) {
@@ -35,8 +63,8 @@ export default function AdminLayout({
     );
   }
 
-  // If not authenticated, redirect to login (handled by useEffect)
-  if (!isAuthenticated) {
+  // If not authenticated and not on login page, redirect to login
+  if (!isAuthenticated && !pathname.includes('/admin/login')) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -47,7 +75,7 @@ export default function AdminLayout({
     );
   }
 
-  // If we get here, user is authenticated
+  // If we get here, user is authenticated or on login page
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <Navbar />
