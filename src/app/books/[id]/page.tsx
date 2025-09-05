@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
+import ReadingContent from '@/components/ReadingContent';
+import TextCustomizationControls from '@/components/TextCustomizationControls';
 import Button from '@/components/ui/Button';
 import { FiDownload, FiHeart, FiShare2, FiStar, FiBook, FiFile } from 'react-icons/fi';
 
@@ -247,6 +249,7 @@ export default function BookDetail({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-900 text-white">
+      <TextCustomizationControls />
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Book Cover and Details */}
@@ -329,7 +332,9 @@ export default function BookDetail({ params }: { params: { id: string } }) {
           <div className="lg:col-span-2">
             <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 mb-8">
               <h2 className="text-xl font-bold mb-4">Description</h2>
-              <p className="text-gray-300 mb-6">{book.description}</p>
+              <ReadingContent className="text-gray-300 mb-6">
+                {book.description}
+              </ReadingContent>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div>
@@ -353,7 +358,9 @@ export default function BookDetail({ params }: { params: { id: string } }) {
               {book.author?.bio && (
                 <div>
                   <h3 className="text-lg font-bold mb-2">About the Author</h3>
-                  <p className="text-gray-300">{book.author.bio}</p>
+                  <ReadingContent className="text-gray-300">
+                    {book.author.bio}
+                  </ReadingContent>
                 </div>
               )}
             </div>
