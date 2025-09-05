@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
-import { FiMenu, FiX, FiBook, FiHeadphones, FiShoppingCart, FiUser, FiLogIn, FiLogOut, FiHome } from 'react-icons/fi';
+import { useTheme } from '@/contexts/ThemeContext';
+import { FiMenu, FiX, FiBook, FiHeadphones, FiShoppingCart, FiUser, FiLogIn, FiLogOut, FiHome, FiSun, FiMoon } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 
 export default function Navbar() {
@@ -14,6 +15,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
   const { cartCount } = useCart();
+  const { theme, toggleTheme } = useTheme();
 
   const navLinks = [
     { name: 'Home', href: '/', icon: <FiHome /> },
@@ -59,6 +61,14 @@ export default function Navbar() {
 
           {/* User Actions */}
           <div className="hidden md:flex items-center space-x-3">
+            <button 
+              onClick={toggleTheme}
+              className="p-2 text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-800"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? <FiSun className="text-xl" /> : <FiMoon className="text-xl" />}
+            </button>
+            
             <Link href="/cart" className="relative p-2 text-gray-300 hover:text-white transition-colors">
               <FiShoppingCart className="text-xl" />
               {cartCount > 0 && (
@@ -104,6 +114,14 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
+            <button 
+              onClick={toggleTheme}
+              className="p-2 text-gray-300 hover:text-white mr-2"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? <FiSun className="text-xl" /> : <FiMoon className="text-xl" />}
+            </button>
+            
             <Link href="/cart" className="relative p-2 text-gray-300 hover:text-white mr-2">
               <FiShoppingCart className="text-xl" />
               {cartCount > 0 && (
@@ -175,6 +193,17 @@ export default function Navbar() {
             ))}
             
             <div className="border-t border-gray-700 mt-4 pt-4">
+              <button 
+                className="flex items-center px-4 py-3 text-lg text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors w-full text-left"
+                onClick={() => {
+                  toggleTheme();
+                  setIsMenuOpen(false);
+                }}
+              >
+                {theme === 'dark' ? <FiSun className="mr-3 text-xl" /> : <FiMoon className="mr-3 text-xl" />}
+                Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode
+              </button>
+              
               {user ? (
                 <>
                   <Link 

@@ -1,9 +1,10 @@
-// Root layout with admin provider
+// Root layout with providers
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { AdminProvider } from '@/contexts/AdminContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -20,19 +21,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AdminProvider>
-          <AuthProvider>
-            <CartProvider>
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-grow">
-                  {children}
-                </main>
-                <Footer />
-              </div>
-            </CartProvider>
-          </AuthProvider>
-        </AdminProvider>
+        <ThemeProvider>
+          <AdminProvider>
+            <AuthProvider>
+              <CartProvider>
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-grow">
+                    {children}
+                  </main>
+                  <Footer />
+                </div>
+              </CartProvider>
+            </AuthProvider>
+          </AdminProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

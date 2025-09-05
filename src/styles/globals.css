@@ -8,6 +8,18 @@
   --background-end-rgb: 30, 41, 59;
 }
 
+.light-mode {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 240, 240, 240;
+}
+
+.dark-mode {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 15, 23, 42;
+  --background-end-rgb: 30, 41, 59;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -20,6 +32,31 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
+}
+
+/* Light mode */
+body.light-mode {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 240, 240, 240;
+  
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-start-rgb));
+}
+
+/* Dark mode */
+body.dark-mode {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 15, 23, 42;
+  --background-end-rgb: 30, 41, 59;
+  
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
 }
 
 /* High contrast mode */
@@ -46,6 +83,48 @@ body.high-contrast button {
 body.high-contrast button:hover {
   background: #000;
   color: #fff;
+}
+
+/* Light mode overrides */
+body.light-mode .bg-gray-800\/50 {
+  background-color: rgba(249, 250, 251, 0.8);
+}
+
+body.light-mode .bg-gray-800 {
+  background-color: #f9fafb;
+}
+
+body.light-mode .border-gray-700 {
+  border-color: #e5e7eb;
+}
+
+body.light-mode .border-gray-800 {
+  border-color: #d1d5db;
+}
+
+body.light-mode .text-gray-300 {
+  color: #6b7280;
+}
+
+body.light-mode .text-gray-400 {
+  color: #9ca3af;
+}
+
+body.light-mode .text-white {
+  color: #111827;
+}
+
+body.light-mode .bg-gray-900 {
+  background-color: #f3f4f6;
+}
+
+/* Dark mode overrides */
+body.dark-mode .bg-gray-800\/50 {
+  background-color: rgba(31, 41, 55, 0.5);
+}
+
+body.dark-mode .text-white {
+  color: #ffffff;
 }
 
 /* Dyslexia-friendly font */
