@@ -1,17 +1,18 @@
 // Book detail page with PDF viewer
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmarks } from '@/contexts/BookmarkContext';
+import { useReadingStats } from '@/contexts/ReadingStatsContext';
 import ReadingContent from '@/components/ReadingContent';
 import TextCustomizationControls from '@/components/TextCustomizationControls';
 import BookmarkButton from '@/components/BookmarkButton';
 import BookmarkNoteModal from '@/components/BookmarkNoteModal';
 import Button from '@/components/ui/Button';
-import { FiDownload, FiHeart, FiShare2, FiStar, FiBook, FiFile, FiBookmark } from 'react-icons/fi';
+import { FiDownload, FiHeart, FiShare2, FiStar, FiBook, FiFile, FiBookmark, FiClock } from 'react-icons/fi';
 
 interface Book {
   id: number;
@@ -47,18 +48,59 @@ export default function BookDetail({ params }: { params: { id: string } }) {
   const [showFullPdf, setShowFullPdf] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isBookmarkModalOpen, setIsBookmarkModalOpen] = useState(false);
+  const [readingTime, setReadingTime] = useState(0);
   const { user } = useAuth();
   const { bookmarks, addBookmark } = useBookmarks();
+  const { addReadingTime } = useReadingStats();
   const router = useRouter();
+  const readingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number | null>(null);
   
   console.log('BookDetail component loaded with params:', params);
 
+  // Track reading time
   useEffect(() => {
-    fetchBook();
-    if (user) {
-      fetchUserLibrary();
+    if (showFullPdf && user) {
+      // Start timer when PDF is shown
+      startTimeRef.current = Date.now();
+      
+      // Set up periodic timer updates
+      readingTimerRef.current = setInterval(() => {
+        if (startTimeRef.current) {
+          const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
+          setReadingTime(elapsedSeconds);
+        }
+      }, 1000);
+    } else {
+      // Stop timer and save reading time
+      if (readingTimerRef.current) {
+        clearInterval(readingTimerRef.current);
+        readingTimerRef.current = null;
+      }
+      
+      // Save accumulated reading time
+      if (startTimeRef.current && readingTime > 0) {
+        const contentId = parseInt(params.id);
+        addReadingTime(contentId, readingTime, 1); // Assume 1 page read per minute for demo
+        startTimeRef.current = null;
+        setReadingTime(0);
+      }
     }
-  }, [params.id, user]);
+    
+    // Cleanup function
+    return () => {
+      if (readingTimerRef.current) {
+        clearInterval(readingTimerRef.current);
+      }
+      
+      // Save any remaining reading time
+      if (startTimeRef.current && readingTime > 0) {
+        const contentId = parseInt(params.id);
+        addReadingTime(contentId, readingTime, 1);
+        startTimeRef.current = null;
+      }
+    };
+  }, [showFullPdf, user, readingTime, params.id, addReadingTime]);
 
   const fetchBook = async () => {
     try {
@@ -432,6 +474,27 @@ export default function BookDetail({ params }: { params: { id: string } }) {
                     <FiFile className="text-4xl text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-500">No preview available</p>
                   </div>
+                </div>
+              )}
+              
+              {showFullPdf && user && (
+                <div className="flex items-center justify-between bg-gray-700/50 rounded-lg p-3 mb-4 mt-4">
+                  <div className="flex items-center">
+                    <FiClock className="text-indigo-500 mr-2" />
+                    <span className="text-sm">
+                      Reading time: {Math.floor(readingTime / 60)}:{(readingTime % 60).toString().padStart(2, '0')}
+                    </span>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      // Pause reading and save progress
+                      setShowFullPdf(false);
+                    }}
+                  >
+                    Pause
+                  </Button>
                 </div>
               )}
               
