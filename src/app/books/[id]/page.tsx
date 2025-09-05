@@ -5,10 +5,13 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBookmarks } from '@/contexts/BookmarkContext';
 import ReadingContent from '@/components/ReadingContent';
 import TextCustomizationControls from '@/components/TextCustomizationControls';
+import BookmarkButton from '@/components/BookmarkButton';
+import BookmarkNoteModal from '@/components/BookmarkNoteModal';
 import Button from '@/components/ui/Button';
-import { FiDownload, FiHeart, FiShare2, FiStar, FiBook, FiFile } from 'react-icons/fi';
+import { FiDownload, FiHeart, FiShare2, FiStar, FiBook, FiFile, FiBookmark } from 'react-icons/fi';
 
 interface Book {
   id: number;
@@ -42,7 +45,10 @@ export default function BookDetail({ params }: { params: { id: string } }) {
   const [isInLibrary, setIsInLibrary] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [showFullPdf, setShowFullPdf] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isBookmarkModalOpen, setIsBookmarkModalOpen] = useState(false);
   const { user } = useAuth();
+  const { bookmarks, addBookmark } = useBookmarks();
   const router = useRouter();
   
   console.log('BookDetail component loaded with params:', params);
@@ -369,6 +375,24 @@ export default function BookDetail({ params }: { params: { id: string } }) {
             <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">Preview</h2>
+                {user && (
+                  <div className="flex space-x-2">
+                    <BookmarkButton 
+                      contentId={parseInt(params.id)} 
+                      currentPage={currentPage}
+                      className="p-2"
+                    />
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsBookmarkModalOpen(true)}
+                      className="flex items-center"
+                    >
+                      <FiBookmark className="mr-2" />
+                      Add Note
+                    </Button>
+                  </div>
+                )}
                 {user && isInLibrary && !showFullPdf && (
                   <Button 
                     onClick={() => {
@@ -411,7 +435,17 @@ export default function BookDetail({ params }: { params: { id: string } }) {
                 </div>
               )}
               
-              {user && isInLibrary && (
+              {user && (
+                <BookmarkNoteModal
+                  contentId={parseInt(params.id)}
+                  currentPage={currentPage}
+                  isOpen={isBookmarkModalOpen}
+                  onClose={() => setIsBookmarkModalOpen(false)}
+                  onSave={() => {
+                    setIsBookmarkModalOpen(false);
+                  }}
+                />
+              )}
                 <div className="mt-4 flex justify-between items-center">
                   <Button variant="outline">
                     <FiDownload className="mr-2" />
