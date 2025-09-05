@@ -28,12 +28,12 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <ReadingSettingsProvider>
-            <BookmarkProvider>
-              <ReadingStatsProvider>
-                <OfflineProvider>
-                  <RecommendationsProvider>
-                    <AdminProvider>
-                      <AuthProvider>
+            <ReadingStatsProvider>
+              <OfflineProvider>
+                <RecommendationsProvider>
+                  <AdminProvider>
+                    <AuthProvider>
+                      <BookmarkProvider>
                         <CartProvider>
                           <div className="flex flex-col min-h-screen">
                             <Navbar />
@@ -43,12 +43,12 @@ export default function RootLayout({
                             <Footer />
                           </div>
                         </CartProvider>
-                      </AuthProvider>
-                    </AdminProvider>
-                  </RecommendationsProvider>
-                </OfflineProvider>
-              </ReadingStatsProvider>
-            </BookmarkProvider>
+                      </BookmarkProvider>
+                    </AuthProvider>
+                  </AdminProvider>
+                </RecommendationsProvider>
+              </OfflineProvider>
+            </ReadingStatsProvider>
           </ReadingSettingsProvider>
         </ThemeProvider>
       </body>
