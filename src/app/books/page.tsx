@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient';
 import BookCard from '@/components/BookCard';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { useCart } from '@/contexts/CartContext';
 
 interface Book {
   id: number;
@@ -24,6 +25,7 @@ export default function Books() {
   const [loading, setLoading] = useState(true);
   const [contentType, setContentType] = useState<'all' | 'ebook' | 'audiobook'>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high'>('newest');
+  const { addToCart } = useCart();
 
   useEffect(() => {
     fetchBooks();
@@ -182,6 +184,13 @@ export default function Books() {
                   coverUrl={book.cover_url}
                   contentType={book.content_type}
                   price={book.price}
+                  onAddToCart={() => addToCart({
+                    id: book.id,
+                    title: book.title,
+                    price: book.price,
+                    contentType: book.content_type,
+                    cover_url: book.cover_url
+                  })}
                 />
               ))}
             </div>
