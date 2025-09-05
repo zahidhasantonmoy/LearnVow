@@ -1,7 +1,6 @@
 // Admin layout with authentication
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useAdmin } from '@/contexts/AdminContext';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/admin/Navbar';
@@ -15,19 +14,22 @@ export default function AdminLayout({
 }) {
   const { isAuthenticated, loading } = useAdmin();
   const router = useRouter();
-  const [showContent, setShowContent] = useState(false);
 
-  useEffect(() => {
-    if (!loading) {
-      if (!isAuthenticated) {
-        router.push('/admin/login');
-      } else {
-        setShowContent(true);
-      }
-    }
-  }, [isAuthenticated, loading, router]);
+  // Redirect to login if not authenticated and not loading
+  if (!loading && !isAuthenticated) {
+    router.push('/admin/login');
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <FiLoader className="animate-spin text-4xl text-indigo-500 mx-auto mb-4" />
+          <p className="text-gray-400">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (loading || !showContent) {
+  // Show loading state while checking authentication
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -38,6 +40,7 @@ export default function AdminLayout({
     );
   }
 
+  // If we get here, user is authenticated
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <Navbar />
