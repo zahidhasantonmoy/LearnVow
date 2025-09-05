@@ -62,6 +62,20 @@ export default function BookDetail({ params }: { params: { id: string } }) {
         return;
       }
       
+      // First, let's check if the book exists at all
+      const { count, error: countError } = await supabase
+        .from('content')
+        .select('*', { count: 'exact', head: true })
+        .eq('id', bookId);
+      
+      console.log('Book count check:', { count, countError });
+      
+      if (countError) {
+        console.error('Error checking book count:', countError);
+      } else {
+        console.log('Number of books with ID', bookId, ':', count);
+      }
+      
       const { data, error } = await supabase
         .from('content')
         .select(`
@@ -75,7 +89,11 @@ export default function BookDetail({ params }: { params: { id: string } }) {
 
       console.log('Supabase response:', { data, error });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        setLoading(false);
+        return;
+      }
       
       // Check if book exists
       if (!data) {
