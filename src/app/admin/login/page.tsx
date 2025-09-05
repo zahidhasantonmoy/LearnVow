@@ -1,13 +1,9 @@
-// Admin login page
+// Simplified Admin login page
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/contexts/AdminContext';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import Input from '@/components/ui/Input';
-import { FiLock, FiMail, FiLogIn } from 'react-icons/fi';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('admin@learnvow.com');
@@ -48,12 +44,14 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8">
+      <div className="w-full max-w-md p-8 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700">
         <div className="text-center mb-8">
           <div className="bg-indigo-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <FiLock className="text-white text-2xl" />
+            <svg className="text-white text-2xl" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Admin Portal</h1>
+          <h1 className="text-3xl font-bold mb-2 text-white">Admin Portal</h1>
           <p className="text-gray-400">Sign in to access the administration panel</p>
         </div>
         
@@ -64,29 +62,39 @@ export default function AdminLogin() {
         )}
         
         <form onSubmit={handleSubmit}>
-          <Input
-            label="Email Address"
-            type="email"
-            placeholder="admin@learnvow.com"
-            value={email}
-            onChange={(e) => {
-              console.log('Email changed to:', e.target.value);
-              setEmail(e.target.value);
-            }}
-            required
-          />
+          <div className="mb-4">
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              placeholder="admin@learnvow.com"
+              value={email}
+              onChange={(e) => {
+                console.log('Email changed to:', e.target.value);
+                setEmail(e.target.value);
+              }}
+              required
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
+            />
+          </div>
           
-          <Input
-            label="Password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => {
-              console.log('Password changed to:', e.target.value);
-              setPassword(e.target.value);
-            }}
-            required
-          />
+          <div className="mb-4">
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => {
+                console.log('Password changed to:', e.target.value);
+                setPassword(e.target.value);
+              }}
+              required
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
+            />
+          </div>
           
           <div className="flex items-center justify-between mb-6">
             <label className="flex items-center">
@@ -101,10 +109,10 @@ export default function AdminLogin() {
             </a>
           </div>
           
-          <Button 
+          <button 
             type="submit" 
-            className="w-full"
             disabled={loading}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center">
@@ -116,17 +124,19 @@ export default function AdminLogin() {
               </span>
             ) : (
               <span className="flex items-center justify-center">
-                <FiLogIn className="mr-2" />
+                <svg className="mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                </svg>
                 Sign In
               </span>
             )}
-          </Button>
+          </button>
         </form>
         
         <div className="mt-8 text-center text-gray-500 text-sm">
           <p>© {new Date().getFullYear()} LearnVow. All rights reserved.</p>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
