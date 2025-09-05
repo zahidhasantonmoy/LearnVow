@@ -122,9 +122,9 @@ export default function AdminLogin() {
             }}>
               Email Address
             </label>
-            <input
+                        <input
               type="email"
-              placeholder="admin@learnvow.com"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -139,8 +139,8 @@ export default function AdminLogin() {
                 outline: 'none',
                 transition: 'all 0.2s'
               }}
-              onFocus={(e) => e.target.style.borderColor = '#6366f1'}
-              onBlur={(e) => e.target.style.borderColor = '#4a5568'}
+              onFocus={(e) => (e.target as HTMLInputElement).style.borderColor = '#6366f1'}
+              onBlur={(e) => (e.target as HTMLInputElement).style.borderColor = '#4a5568'}
             />
           </div>
           
@@ -171,8 +171,8 @@ export default function AdminLogin() {
                 outline: 'none',
                 transition: 'all 0.2s'
               }}
-              onFocus={(e) => e.target.style.borderColor = '#6366f1'}
-              onBlur={(e) => e.target.style.borderColor = '#4a5568'}
+              onFocus={(e) => (e.target as HTMLInputElement).style.borderColor = '#6366f1'}
+              onBlur={(e) => (e.target as HTMLInputElement).style.borderColor = '#4a5568'}
             />
           </div>
           
@@ -194,8 +194,8 @@ export default function AdminLogin() {
               alignItems: 'center',
               justifyContent: 'center'
             }}
-            onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#5a5fe0')}
-            onMouseOut={(e) => !loading && (e.target.style.backgroundColor = '#6366f1')}
+            onMouseOver={(e) => !loading && ((e.target as HTMLButtonElement).style.backgroundColor = '#5a5fe0')}
+            onMouseOut={(e) => !loading && ((e.target as HTMLButtonElement).style.backgroundColor = '#6366f1')}
           >
             {loading ? (
               <>

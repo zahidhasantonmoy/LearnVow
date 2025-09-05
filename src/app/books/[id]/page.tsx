@@ -13,7 +13,7 @@ import TextCustomizationControls from '@/components/TextCustomizationControls';
 import BookmarkButton from '@/components/BookmarkButton';
 import BookmarkNoteModal from '@/components/BookmarkNoteModal';
 import Button from '@/components/ui/Button';
-import { FiDownload, FiHeart, FiShare2, FiStar, FiBook, FiFile, FiBookmark, FiClock, FiWifiOff } from 'react-icons/fi';
+import { FiDownload, FiHeart, FiShare2, FiStar, FiBook, FiFile, FiBookmark, FiClock, FiWifiOff, FiLoader, FiCheck } from 'react-icons/fi';
 
 interface Book {
   id: number;
@@ -61,26 +61,7 @@ export default function BookDetail({ params }: { params: { id: string } }) {
   
   console.log('BookDetail component loaded with params:', params);
 
-  const handleDownloadForOffline = async () => {
-    if (!book || !isSupported) return;
-    
-    setIsDownloading(true);
-    
-    try {
-      await downloadBook(parseInt(params.id), {
-        title: book.title,
-        author: book.author?.name || 'Unknown Author',
-        cover_url: book.cover_url || '',
-        content_type: book.content_type,
-        file_url: book.file_urls?.full || book.sample_url || '',
-        file_size: 0 // In a real implementation, we would get the actual file size
-      });
-    } catch (error) {
-      console.error('Error downloading book for offline use:', error);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
+  useEffect(() => {
     if (showFullPdf && user) {
       // Start timer when PDF is shown
       startTimeRef.current = Date.now();
@@ -266,6 +247,16 @@ export default function BookDetail({ params }: { params: { id: string } }) {
     }
 
     try {
+      if (isInLibrary) {
+        // Remove from library
+        const { error } = await supabase
+          .from('user_libraries')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('content_id', parseInt(params.id));
+        
+        if (error) throw error;
+        setIsInLibrary(false);
       } else {
         // Add to library
         const { error } = await supabase
@@ -302,7 +293,6 @@ export default function BookDetail({ params }: { params: { id: string } }) {
     } finally {
       setIsDownloading(false);
     }
-  };
   };
 
   if (loading) {
@@ -542,6 +532,7 @@ export default function BookDetail({ params }: { params: { id: string } }) {
                   }}
                 />
               )}
+              {user && (
                 <div className="mt-4 flex justify-between items-center">
                   <Button variant="outline">
                     <FiDownload className="mr-2" />

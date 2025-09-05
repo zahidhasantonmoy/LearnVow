@@ -9,6 +9,7 @@ import { ReadingSettingsProvider } from '@/contexts/ReadingSettingsContext';
 import { BookmarkProvider } from '@/contexts/BookmarkContext';
 import { ReadingStatsProvider } from '@/contexts/ReadingStatsContext';
 import { OfflineProvider } from '@/contexts/OfflineContext';
+import { RecommendationsProvider } from '@/contexts/RecommendationsContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -30,19 +31,21 @@ export default function RootLayout({
             <BookmarkProvider>
               <ReadingStatsProvider>
                 <OfflineProvider>
-                  <AdminProvider>
-                    <AuthProvider>
-                      <CartProvider>
-                        <div className="flex flex-col min-h-screen">
-                          <Navbar />
-                          <main className="flex-grow">
-                            {children}
-                          </main>
-                          <Footer />
-                        </div>
-                      </CartProvider>
-                    </AuthProvider>
-                  </AdminProvider>
+                  <RecommendationsProvider>
+                    <AdminProvider>
+                      <AuthProvider>
+                        <CartProvider>
+                          <div className="flex flex-col min-h-screen">
+                            <Navbar />
+                            <main className="flex-grow">
+                              {children}
+                            </main>
+                            <Footer />
+                          </div>
+                        </CartProvider>
+                      </AuthProvider>
+                    </AdminProvider>
+                  </RecommendationsProvider>
                 </OfflineProvider>
               </ReadingStatsProvider>
             </BookmarkProvider>

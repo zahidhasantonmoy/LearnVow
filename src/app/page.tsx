@@ -4,9 +4,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { FiBook, FiHeadphones, FiShoppingCart, FiUser, FiStar, FiDownload } from 'react-icons/fi';
+import { FiBook, FiHeadphones, FiShoppingCart, FiUser, FiStar, FiDownload, FiTrendingUp } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import DeveloperInfo from '@/components/DeveloperInfo';
+import { useRecommendations } from '@/contexts/RecommendationsContext';
+import Recommendations from '@/components/Recommendations';
 
 export default function Home() {
   const [isClient, setIsClient] = useState(false);
@@ -141,12 +143,38 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* Recommendations Section */}
+        <motion.div 
+          className="mb-16"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.4, duration: 0.5 }}
+        >
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold flex items-center">
+              <FiTrendingUp className="mr-3 text-indigo-500" />
+              Recommended For You
+            </h2>
+            <Link 
+              href="/dashboard/recommendations" 
+              className="text-indigo-400 hover:text-indigo-300 flex items-center"
+            >
+              View All
+              <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </Link>
+          </div>
+          
+          <Recommendations />
+        </motion.div>
+
         {/* How It Works Section */}
         <motion.div
           className="mb-16"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.4, duration: 0.5 }}
+          transition={{ delay: 1.6, duration: 0.5 }}
         >
           <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
           
