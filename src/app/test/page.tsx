@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase, getBooks } from '@/lib/supabaseClient';
 import Button from '@/components/ui/Button';
 
 export default function TestPage() {
@@ -20,7 +20,7 @@ export default function TestPage() {
       setError(null);
       
       // Fetch content
-      const { data, error } = await supabase.getBooks();
+      const { data, error } = await getBooks();
       
       if (error) {
         console.error('Error fetching books:', error);
