@@ -124,7 +124,14 @@ export const getUserLibrary = async (userId: string) => {
   try {
     const { data, error } = await supabase
       .from('user_libraries')
-      .select('content(*)')
+      .select(`
+        content(
+          *,
+          authors(name),
+          categories(name),
+          publishers(name)
+        )
+      `)
       .eq('user_id', userId);
     
     if (error) {

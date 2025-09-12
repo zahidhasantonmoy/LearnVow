@@ -79,7 +79,7 @@ export default function Books() {
       // Map the data to include author name directly
       const booksWithAuthors = data.map(book => ({
         ...book,
-        author: book.authors?.name || 'Unknown Author'
+        author: book.authors && book.authors.length > 0 ? book.authors[0].name : 'Unknown Author'
       }));
       
       console.log('Processed books:', booksWithAuthors);

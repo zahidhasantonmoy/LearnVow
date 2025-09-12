@@ -102,7 +102,7 @@ export default function TestPage() {
                     <tr key={item.id}>
                       <td className="px-4 py-3 whitespace-nowrap">{item.id}</td>
                       <td className="px-4 py-3">{item.title}</td>
-                      <td className="px-4 py-3">{item.authors?.name || 'Unknown'}</td>
+                      <td className="px-4 py-3">{item.authors && item.authors.length > 0 ? item.authors[0].name : 'Unknown'}</td>
                       <td className="px-4 py-3">{item.content_type}</td>
                       <td className="px-4 py-3">${item.price?.toFixed(2) || '0.00'}</td>
                     </tr>
