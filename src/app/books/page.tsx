@@ -1,4 +1,4 @@
-// Enhanced Books catalog page with improved mobile responsiveness
+// Enhanced Books catalog page with improved mobile responsiveness and better error handling
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,6 +23,7 @@ export default function Books() {
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [contentType, setContentType] = useState<'all' | 'ebook' | 'audiobook'>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high'>('newest');
   const { addToCart } = useCart();
@@ -37,15 +38,41 @@ export default function Books() {
 
   const fetchBooks = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      
+      // Fetch content with joined author data
       const { data, error } = await supabase
         .from('content')
         .select(`
-          *,
+          id,
+          title,
+          subtitle,
+          description,
+          cover_url,
+          content_type,
+          file_urls,
+          sample_url,
+          author_id,
+          publisher_id,
+          category_id,
+          isbn,
+          pages,
+          duration,
+          language,
+          tags,
+          price,
+          is_active,
+          created_at,
+          updated_at,
           authors(name)
         `)
         .eq('is_active', true);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
       console.log('Raw data from Supabase:', data);
       
@@ -58,8 +85,9 @@ export default function Books() {
       console.log('Processed books:', booksWithAuthors);
       
       setBooks(booksWithAuthors);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching books:', error);
+      setError(error.message || 'Failed to fetch books');
     } finally {
       setLoading(false);
     }
@@ -92,7 +120,8 @@ export default function Books() {
         break;
       case 'newest':
       default:
-        // Assuming books are already sorted by creation date from Supabase
+        // Sort by creation date (newest first)
+        result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
     }
     
@@ -106,6 +135,20 @@ export default function Books() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
           <p className="mt-4 text-gray-400">Loading books...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-center max-w-md p-6 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700">
+          <h2 className="text-2xl font-bold text-red-400 mb-4">Error Loading Books</h2>
+          <p className="text-gray-300 mb-6">{error}</p>
+          <Button onClick={fetchBooks} className="touch-target">
+            Try Again
+          </Button>
         </div>
       </div>
     );

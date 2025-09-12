@@ -1,4 +1,4 @@
-// Supabase client configuration
+// Supabase client configuration with enhanced error handling
 import { createClient } from '@supabase/supabase-js';
 
 // Ensure these environment variables are set in Vercel
@@ -9,61 +9,152 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  db: {
+    schema: 'public'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'learnvow-app-1.0'
+    }
+  }
+});
 
-// Helper functions for common operations
+// Helper functions for common operations with error handling
 export const getUser = async () => {
-  const { data, error } = await supabase.auth.getUser();
-  if (error) throw error;
-  return data.user;
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return data.user;
+  } catch (error) {
+    console.error('Error getting user:', error);
+    throw error;
+  }
 };
 
 export const signIn = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error signing in:', error);
+    throw error;
+  }
 };
 
 export const signUp = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error signing up:', error);
+    throw error;
+  }
 };
 
 export const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error signing out:', error);
+    throw error;
+  }
 };
 
-// Content functions
+// Content functions with enhanced error handling
 export const getBooks = async () => {
-  const { data, error } = await supabase
-    .from('content')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase
+      .from('content')
+      .select(`
+        *,
+        authors(name),
+        categories(name),
+        publishers(name)
+      `)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Supabase query error:', error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    throw error;
+  }
 };
 
 export const getBookById = async (id: number) => {
-  const { data, error } = await supabase
-    .from('content')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase
+      .from('content')
+      .select(`
+        *,
+        authors(name),
+        categories(name),
+        publishers(name)
+      `)
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error('Supabase query error:', error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching book by ID:', error);
+    throw error;
+  }
 };
 
 export const getUserLibrary = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('user_libraries')
-    .select('content(*)')
-    .eq('user_id', userId);
-  
-  if (error) throw error;
-  return data.map((item: any) => item.content);
+  try {
+    const { data, error } = await supabase
+      .from('user_libraries')
+      .select('content(*)')
+      .eq('user_id', userId);
+    
+    if (error) {
+      console.error('Supabase query error:', error);
+      throw error;
+    }
+    
+    return data.map((item: any) => item.content);
+  } catch (error) {
+    console.error('Error fetching user library:', error);
+    throw error;
+  }
+};
+
+// Function to test the connection
+export const testConnection = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('content')
+      .select('id')
+      .limit(1);
+    
+    if (error) {
+      console.error('Connection test failed:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Connection test failed:', error);
+    return false;
+  }
 };
