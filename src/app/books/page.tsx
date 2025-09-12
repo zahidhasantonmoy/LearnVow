@@ -16,6 +16,7 @@ interface Book {
   cover_url?: string;
   content_type: 'ebook' | 'audiobook';
   price: number;
+  created_at: string;
 }
 
 export default function Books() {

@@ -19,14 +19,6 @@ export default function TestPage() {
       setLoading(true);
       setError(null);
       
-      // Test connection first
-      const isConnected = await supabase.testConnection();
-      console.log('Connection test result:', isConnected);
-      
-      if (!isConnected) {
-        throw new Error('Failed to connect to Supabase');
-      }
-      
       // Fetch content
       const { data, error } = await supabase.getBooks();
       
