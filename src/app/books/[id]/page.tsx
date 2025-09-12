@@ -165,9 +165,9 @@ export default function BookDetail({ params }: { params: { id: string } }) {
       // Format the book data
       const formattedBook = {
         ...data,
-        author: data.authors,
-        category: data.categories,
-        publisher: data.publishers,
+        author: data.authors && data.authors.length > 0 ? data.authors[0] : null,
+        category: data.categories && data.categories.length > 0 ? data.categories[0] : null,
+        publisher: data.publishers && data.publishers.length > 0 ? data.publishers[0] : null,
         file_urls: data.file_urls ? JSON.parse(data.file_urls) : null
       };
 
