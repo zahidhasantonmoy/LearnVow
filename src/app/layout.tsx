@@ -26,13 +26,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider>
-          <ReadingSettingsProvider>
-            <ReadingStatsProvider>
-              <OfflineProvider>
-                <RecommendationsProvider>
-                  <AdminProvider>
-                    <AuthProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <ReadingSettingsProvider>
+              <ReadingStatsProvider>
+                <OfflineProvider>
+                  <RecommendationsProvider>
+                    <AdminProvider>
                       <BookmarkProvider>
                         <CartProvider>
                           <div className="flex flex-col min-h-screen">
@@ -44,13 +44,13 @@ export default function RootLayout({
                           </div>
                         </CartProvider>
                       </BookmarkProvider>
-                    </AuthProvider>
-                  </AdminProvider>
-                </RecommendationsProvider>
-              </OfflineProvider>
-            </ReadingStatsProvider>
-          </ReadingSettingsProvider>
-        </ThemeProvider>
+                    </AdminProvider>
+                  </RecommendationsProvider>
+                </OfflineProvider>
+              </ReadingStatsProvider>
+            </ReadingSettingsProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
