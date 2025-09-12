@@ -20,12 +20,7 @@ export default function TestPage() {
       setError(null);
       
       // Fetch content
-      const { data, error } = await getBooks();
-      
-      if (error) {
-        console.error('Error fetching books:', error);
-        throw error;
-      }
+      const data = await getBooks();
       
       console.log('Fetched data:', data);
       setData(data);
