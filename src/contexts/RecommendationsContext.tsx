@@ -5,38 +5,18 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReadingStats } from '@/contexts/ReadingStatsContext';
-
-interface RecommendedBook {
-  id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  cover_url: string;
-  content_type: 'ebook' | 'audiobook';
-  author: {
-    name: string;
-  };
-  category: {
-    name: string;
-  };
-  publisher: {
-    name: string;
-  };
-  price: number;
-  rating: number;
-  review_count: number;
-  pages: number;
-  similarity_score: number; // 0-100, how similar this book is to user's preferences
-}
+import { RecommendedBook } from '@/types';
 
 interface RecommendationsContextType {
   recommendations: RecommendedBook[];
   trendingBooks: RecommendedBook[];
   personalizedRecommendations: RecommendedBook[];
   loading: boolean;
+  error: string | null;
   refreshRecommendations: () => Promise<void>;
   getRecommendationsForCategory: (categoryId: number) => Promise<RecommendedBook[]>;
   markBookAsViewed: (bookId: number) => Promise<void>;
+  clearError: () => void;
 }
 
 const RecommendationsContext = createContext<RecommendationsContextType | undefined>(undefined);
@@ -46,6 +26,7 @@ export function RecommendationsProvider({ children }: { children: ReactNode }) {
   const [trendingBooks, setTrendingBooks] = useState<RecommendedBook[]>([]);
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState<RecommendedBook[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Use optional chaining to handle cases when auth context is not available
   const authContext = useAuth();
@@ -55,12 +36,18 @@ export function RecommendationsProvider({ children }: { children: ReactNode }) {
   const readingStatsContext = useReadingStats();
   const stats = readingStatsContext?.stats || [];
 
+  const clearError = () => {
+    setError(null);
+  };
+
   useEffect(() => {
     fetchRecommendations();
   }, [user, stats]);
 
   const fetchRecommendations = async () => {
     setLoading(true);
+    clearError();
+    
     try {
       // Fetch trending books (most popular)
       await fetchTrendingBooks();
@@ -80,8 +67,9 @@ export function RecommendationsProvider({ children }: { children: ReactNode }) {
       ];
       
       setRecommendations(allRecommendations);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching recommendations:', error);
+      setError('Failed to load recommendations. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -196,8 +184,10 @@ export function RecommendationsProvider({ children }: { children: ReactNode }) {
       ];
       
       setTrendingBooks(mockTrendingBooks);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching trending books:', error);
+      setError('Failed to load trending books. Please try again later.');
+      throw error;
     }
   };
 
@@ -317,8 +307,10 @@ export function RecommendationsProvider({ children }: { children: ReactNode }) {
       ];
       
       setPersonalizedRecommendations(mockPersonalizedBooks);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching personalized recommendations:', error);
+      setError('Failed to load personalized recommendations. Please try again later.');
+      throw error;
     }
   };
 
@@ -339,18 +331,34 @@ export function RecommendationsProvider({ children }: { children: ReactNode }) {
   };
 
   const getRecommendationsForCategory = async (categoryId: number): Promise<RecommendedBook[]> => {
-    // In a real implementation, this would fetch recommendations for a specific category
-    // For demo, we'll return a subset of trending books
-    return trendingBooks.filter(book => 
-      book.category.name.toLowerCase().includes('history') || 
-      book.category.name.toLowerCase().includes('philosophy')
-    ).slice(0, 3);
+    clearError();
+    
+    try {
+      // In a real implementation, this would fetch recommendations for a specific category
+      // For demo, we'll return a subset of trending books
+      return trendingBooks.filter(book => 
+        book.category.name.toLowerCase().includes('history') || 
+        book.category.name.toLowerCase().includes('philosophy')
+      ).slice(0, 3);
+    } catch (error: any) {
+      console.error('Error fetching category recommendations:', error);
+      setError('Failed to load category recommendations. Please try again later.');
+      throw error;
+    }
   };
 
   const markBookAsViewed = async (bookId: number): Promise<void> => {
-    // In a real implementation, this would track when a user views a recommended book
-    // to improve future recommendations
-    console.log(`Marked book ${bookId} as viewed`);
+    clearError();
+    
+    try {
+      // In a real implementation, this would track when a user views a recommended book
+      // to improve future recommendations
+      console.log(`Marked book ${bookId} as viewed`);
+    } catch (error: any) {
+      console.error('Error marking book as viewed:', error);
+      setError('Failed to track book view. Please try again later.');
+      throw error;
+    }
   };
 
   const value = {
@@ -358,9 +366,11 @@ export function RecommendationsProvider({ children }: { children: ReactNode }) {
     trendingBooks,
     personalizedRecommendations,
     loading,
+    error,
     refreshRecommendations,
     getRecommendationsForCategory,
-    markBookAsViewed
+    markBookAsViewed,
+    clearError
   };
 
   return (
@@ -379,9 +389,11 @@ export function useRecommendations() {
       trendingBooks: [],
       personalizedRecommendations: [],
       loading: false,
+      error: null,
       refreshRecommendations: async () => {},
       getRecommendationsForCategory: async () => [],
-      markBookAsViewed: async () => {}
+      markBookAsViewed: async () => {},
+      clearError: () => {}
     };
   }
   return context;
