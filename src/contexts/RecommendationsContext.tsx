@@ -46,8 +46,14 @@ export function RecommendationsProvider({ children }: { children: ReactNode }) {
   const [trendingBooks, setTrendingBooks] = useState<RecommendedBook[]>([]);
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState<RecommendedBook[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-  const { stats } = useReadingStats();
+  
+  // Use optional chaining to handle cases when auth context is not available
+  const authContext = useAuth();
+  const user = authContext?.user;
+  
+  // Use optional chaining to handle cases when reading stats context is not available
+  const readingStatsContext = useReadingStats();
+  const stats = readingStatsContext?.stats || [];
 
   useEffect(() => {
     fetchRecommendations();
@@ -367,7 +373,16 @@ export function RecommendationsProvider({ children }: { children: ReactNode }) {
 export function useRecommendations() {
   const context = useContext(RecommendationsContext);
   if (context === undefined) {
-    throw new Error('useRecommendations must be used within a RecommendationsProvider');
+    // Return a default context when used outside of provider to avoid errors during static generation
+    return {
+      recommendations: [],
+      trendingBooks: [],
+      personalizedRecommendations: [],
+      loading: false,
+      refreshRecommendations: async () => {},
+      getRecommendationsForCategory: async () => [],
+      markBookAsViewed: async () => {}
+    };
   }
   return context;
 }

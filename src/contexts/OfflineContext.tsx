@@ -32,7 +32,10 @@ const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
 export function OfflineProvider({ children }: { children: ReactNode }) {
   const [offlineBooks, setOfflineBooks] = useState<OfflineBook[]>([]);
   const [isSupported, setIsSupported] = useState(false);
-  const { user } = useAuth();
+  
+  // Use optional chaining to handle cases when auth context is not available
+  const authContext = useAuth();
+  const user = authContext?.user;
 
   useEffect(() => {
     // Check if offline storage is supported
@@ -182,7 +185,16 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
 export function useOffline() {
   const context = useContext(OfflineContext);
   if (context === undefined) {
-    throw new Error('useOffline must be used within an OfflineProvider');
+    // Return a default context when used outside of provider to avoid errors during static generation
+    return {
+      offlineBooks: [],
+      isSupported: false,
+      downloadBook: async () => {},
+      removeOfflineBook: async () => {},
+      getOfflineBook: () => undefined,
+      isBookDownloaded: () => false,
+      clearAllOfflineBooks: async () => {}
+    };
   }
   return context;
 }

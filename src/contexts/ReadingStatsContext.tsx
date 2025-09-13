@@ -47,7 +47,10 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
     longest_streak: 0
   });
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  
+  // Use optional chaining to handle cases when auth context is not available
+  const authContext = useAuth();
+  const user = authContext?.user;
 
   useEffect(() => {
     if (user) {
@@ -223,7 +226,21 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
 export function useReadingStats() {
   const context = useContext(ReadingStatsContext);
   if (context === undefined) {
-    throw new Error('useReadingStats must be used within a ReadingStatsProvider');
+    // Return a default context when used outside of provider to avoid errors during static generation
+    return {
+      stats: [],
+      summary: {
+        total_time_spent: 0,
+        total_pages_read: 0,
+        books_read: 0,
+        current_streak: 0,
+        longest_streak: 0
+      },
+      loading: false,
+      addReadingTime: async () => {},
+      getStatsForContent: () => undefined,
+      refreshStats: async () => {}
+    };
   }
   return context;
 }
