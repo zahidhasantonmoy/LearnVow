@@ -2,15 +2,7 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-
-interface CartItem {
-  id: number;
-  title: string;
-  price: number;
-  quantity: number;
-  contentType: 'ebook' | 'audiobook';
-  cover_url?: string;
-}
+import { CartItem } from '@/types';
 
 interface CartContextType {
   cart: CartItem[];
@@ -20,48 +12,83 @@ interface CartContextType {
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
+  error: string | null;
+  clearError: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const clearError = () => {
+    setError(null);
+  };
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
-    setCart(prevCart => {
-      const existingItem = prevCart.find(cartItem => cartItem.id === item.id);
-      
-      if (existingItem) {
-        return prevCart.map(cartItem =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        );
-      } else {
-        return [...prevCart, { ...item, quantity: 1 }];
-      }
-    });
+    clearError();
+    
+    try {
+      setCart(prevCart => {
+        const existingItem = prevCart.find(cartItem => cartItem.id === item.id);
+        
+        if (existingItem) {
+          return prevCart.map(cartItem =>
+            cartItem.id === item.id
+              ? { ...cartItem, quantity: cartItem.quantity + 1 }
+              : cartItem
+          );
+        } else {
+          return [...prevCart, { ...item, quantity: 1 } as CartItem];
+        }
+      });
+    } catch (error: any) {
+      console.error('Error adding to cart:', error);
+      setError('Failed to add item to cart. Please try again.');
+    }
   };
 
   const removeFromCart = (id: number) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== id));
+    clearError();
+    
+    try {
+      setCart(prevCart => prevCart.filter(item => item.id !== id));
+    } catch (error: any) {
+      console.error('Error removing from cart:', error);
+      setError('Failed to remove item from cart. Please try again.');
+    }
   };
 
   const updateQuantity = (id: number, quantity: number) => {
+    clearError();
+    
     if (quantity <= 0) {
       removeFromCart(id);
       return;
     }
     
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      )
-    );
+    try {
+      setCart(prevCart =>
+        prevCart.map(item =>
+          item.id === id ? { ...item, quantity } : item
+        )
+      );
+    } catch (error: any) {
+      console.error('Error updating cart quantity:', error);
+      setError('Failed to update item quantity. Please try again.');
+    }
   };
 
   const clearCart = () => {
-    setCart([]);
+    clearError();
+    
+    try {
+      setCart([]);
+    } catch (error: any) {
+      console.error('Error clearing cart:', error);
+      setError('Failed to clear cart. Please try again.');
+    }
   };
 
   const cartTotal = cart.reduce(
@@ -81,7 +108,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     updateQuantity,
     clearCart,
     cartTotal,
-    cartCount
+    cartCount,
+    error,
+    clearError
   };
 
   return (
@@ -102,7 +131,9 @@ export function useCart() {
       updateQuantity: () => {},
       clearCart: () => {},
       cartTotal: 0,
-      cartCount: 0
+      cartCount: 0,
+      error: null,
+      clearError: () => {}
     };
   }
   return context;
