@@ -4,35 +4,17 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
-
-interface ReadingStat {
-  id: number;
-  user_id: string;
-  content_id: number;
-  time_spent: number; // in seconds
-  pages_read: number;
-  last_read: string;
-  created_at: string;
-  updated_at: string;
-  content_title: string;
-  content_cover_url: string;
-}
-
-interface ReadingStatsSummary {
-  total_time_spent: number; // in seconds
-  total_pages_read: number;
-  books_read: number;
-  current_streak: number; // days
-  longest_streak: number; // days
-}
+import { ReadingStat, ReadingStatsSummary } from '@/types';
 
 interface ReadingStatsContextType {
   stats: ReadingStat[];
   summary: ReadingStatsSummary;
   loading: boolean;
+  error: string | null;
   addReadingTime: (contentId: number, timeInSeconds: number, pagesRead: number) => Promise<void>;
   getStatsForContent: (contentId: number) => ReadingStat | undefined;
   refreshStats: () => Promise<void>;
+  clearError: () => void;
 }
 
 const ReadingStatsContext = createContext<ReadingStatsContextType | undefined>(undefined);
@@ -47,10 +29,15 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
     longest_streak: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Use optional chaining to handle cases when auth context is not available
   const authContext = useAuth();
   const user = authContext?.user;
+
+  const clearError = () => {
+    setError(null);
+  };
 
   useEffect(() => {
     if (user) {
@@ -72,6 +59,8 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     
     setLoading(true);
+    clearError();
+    
     try {
       // Fetch individual reading stats
       const { data: statsData, error: statsError } = await supabase
@@ -90,7 +79,7 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
         ...stat,
         content_title: stat.content?.title || 'Unknown Book',
         content_cover_url: stat.content?.cover_url || ''
-      }));
+      })) as ReadingStat[];
 
       setStats(formattedStats);
 
@@ -111,8 +100,9 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
         current_streak,
         longest_streak
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching reading stats:', error);
+      setError('Failed to load reading statistics. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -120,6 +110,8 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
 
   const addReadingTime = async (contentId: number, timeInSeconds: number, pagesRead: number) => {
     if (!user) return;
+    
+    clearError();
     
     try {
       // Check if there's already a record for this user and content
@@ -156,7 +148,7 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
           ...data,
           content_title: data.content?.title || 'Unknown Book',
           content_cover_url: data.content?.cover_url || ''
-        };
+        } as ReadingStat;
 
         setStats(prev => 
           prev.map(stat => 
@@ -187,15 +179,17 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
           ...data,
           content_title: data.content?.title || 'Unknown Book',
           content_cover_url: data.content?.cover_url || ''
-        };
+        } as ReadingStat;
 
         setStats(prev => [formattedStat, ...prev]);
       }
 
       // Refresh summary
       await fetchStats();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding reading time:', error);
+      setError('Failed to update reading statistics. Please try again.');
+      throw error;
     }
   };
 
@@ -211,9 +205,11 @@ export function ReadingStatsProvider({ children }: { children: ReactNode }) {
     stats,
     summary,
     loading,
+    error,
     addReadingTime,
     getStatsForContent,
-    refreshStats
+    refreshStats,
+    clearError
   };
 
   return (
@@ -237,9 +233,11 @@ export function useReadingStats() {
         longest_streak: 0
       },
       loading: false,
+      error: null,
       addReadingTime: async () => {},
       getStatsForContent: () => undefined,
-      refreshStats: async () => {}
+      refreshStats: async () => {},
+      clearError: () => {}
     };
   }
   return context;
