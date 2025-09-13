@@ -3,19 +3,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-
-interface OfflineBook {
-  id: number;
-  title: string;
-  author: string;
-  cover_url: string;
-  content_type: 'ebook' | 'audiobook';
-  file_url: string;
-  downloaded_at: string;
-  file_size: number; // in bytes
-  status: 'downloading' | 'downloaded' | 'failed';
-  progress: number; // 0-100
-}
+import { OfflineBook } from '@/types';
 
 interface OfflineContextType {
   offlineBooks: OfflineBook[];
@@ -25,6 +13,8 @@ interface OfflineContextType {
   getOfflineBook: (bookId: number) => OfflineBook | undefined;
   isBookDownloaded: (bookId: number) => boolean;
   clearAllOfflineBooks: () => Promise<void>;
+  error: string | null;
+  clearError: () => void;
 }
 
 const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
@@ -32,10 +22,15 @@ const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
 export function OfflineProvider({ children }: { children: ReactNode }) {
   const [offlineBooks, setOfflineBooks] = useState<OfflineBook[]>([]);
   const [isSupported, setIsSupported] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Use optional chaining to handle cases when auth context is not available
   const authContext = useAuth();
   const user = authContext?.user;
+
+  const clearError = () => {
+    setError(null);
+  };
 
   useEffect(() => {
     // Check if offline storage is supported
@@ -55,8 +50,9 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
         const parsedBooks = JSON.parse(savedBooks);
         setOfflineBooks(parsedBooks);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading offline books:', error);
+      setError('Failed to load offline books. Please try again.');
     }
   };
 
@@ -64,8 +60,10 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem('offlineBooks', JSON.stringify(books));
       setOfflineBooks(books);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving offline books:', error);
+      setError('Failed to save offline books. Storage may be full.');
+      throw error;
     }
   };
 
@@ -73,8 +71,12 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     bookId: number, 
     bookData: Omit<OfflineBook, 'id' | 'downloaded_at' | 'status' | 'progress'>
   ) => {
+    clearError();
+    
     if (!isSupported) {
-      throw new Error('Offline reading not supported in this browser');
+      const errorMsg = 'Offline reading not supported in this browser';
+      setError(errorMsg);
+      throw new Error(errorMsg);
     }
 
     // Check if book is already downloaded
@@ -96,7 +98,12 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
       ? offlineBooks.map(book => book.id === bookId ? newBook : book)
       : [...offlineBooks, newBook];
 
-    saveOfflineBooks(updatedBooks);
+    try {
+      saveOfflineBooks(updatedBooks);
+    } catch (error: any) {
+      setError('Failed to start download. Please try again.');
+      throw error;
+    }
 
     try {
       // Simulate download progress
@@ -117,33 +124,47 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
       // Simulate download completion
       setTimeout(() => {
         clearInterval(interval);
+        try {
+          saveOfflineBooks(
+            updatedBooks.map(book => 
+              book.id === bookId 
+                ? { ...book, status: 'downloaded', progress: 100 } 
+                : book
+            )
+          );
+        } catch (error: any) {
+          setError('Download completed but failed to save. Please try again.');
+        }
+      }, 2000);
+    } catch (error: any) {
+      console.error('Error downloading book:', error);
+      setError('Download failed. Please check your connection and try again.');
+      try {
         saveOfflineBooks(
           updatedBooks.map(book => 
             book.id === bookId 
-              ? { ...book, status: 'downloaded', progress: 100 } 
+              ? { ...book, status: 'failed', progress: 0 } 
               : book
           )
         );
-      }, 2000);
-    } catch (error) {
-      console.error('Error downloading book:', error);
-      saveOfflineBooks(
-        updatedBooks.map(book => 
-          book.id === bookId 
-            ? { ...book, status: 'failed', progress: 0 } 
-            : book
-        )
-      );
+      } catch (saveError: any) {
+        console.error('Failed to update book status after download error:', saveError);
+      }
+      throw error;
     }
   };
 
   const removeOfflineBook = async (bookId: number) => {
+    clearError();
+    
     try {
       // In a real implementation, we would also remove the cached file
       const updatedBooks = offlineBooks.filter(book => book.id !== bookId);
       saveOfflineBooks(updatedBooks);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing offline book:', error);
+      setError('Failed to remove offline book. Please try again.');
+      throw error;
     }
   };
 
@@ -157,11 +178,15 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
   };
 
   const clearAllOfflineBooks = async () => {
+    clearError();
+    
     try {
       // In a real implementation, we would also clear the cache
       saveOfflineBooks([]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error clearing offline books:', error);
+      setError('Failed to clear offline books. Please try again.');
+      throw error;
     }
   };
 
@@ -172,7 +197,9 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     removeOfflineBook,
     getOfflineBook,
     isBookDownloaded,
-    clearAllOfflineBooks
+    clearAllOfflineBooks,
+    error,
+    clearError
   };
 
   return (
@@ -193,7 +220,9 @@ export function useOffline() {
       removeOfflineBook: async () => {},
       getOfflineBook: () => undefined,
       isBookDownloaded: () => false,
-      clearAllOfflineBooks: async () => {}
+      clearAllOfflineBooks: async () => {},
+      error: null,
+      clearError: () => {}
     };
   }
   return context;
