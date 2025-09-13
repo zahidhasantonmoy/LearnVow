@@ -3,17 +3,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-
-interface AdminUser {
-  id: number;
-  email: string;
-  full_name: string;
-  role: 'admin' | 'editor' | 'viewer';
-  is_active: boolean;
-  last_login: string;
-  created_at: string;
-  updated_at: string;
-}
+import { AdminUser } from '@/types';
 
 interface AdminContextType {
   user: AdminUser | null;
@@ -22,6 +12,8 @@ interface AdminContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   hasPermission: (requiredRole: 'admin' | 'editor' | 'viewer') => Promise<boolean>;
+  error: string | null;
+  clearError: () => void;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -30,13 +22,20 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const clearError = () => {
+    setError(null);
+  };
 
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
   const checkAuthStatus = async () => {
+    clearError();
+    
     try {
       console.log('Checking admin auth status...');
       // Check for existing admin session
@@ -54,11 +53,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         // In a real application, this would validate against the database
         
         // Mock user data for authenticated user
-        const mockUserData = {
+        const mockUserData: AdminUser = {
           id: 1,
           email: 'admin@learnvow.com',
           full_name: 'Administrator',
-          role: 'admin' as 'admin' | 'editor' | 'viewer',
+          role: 'admin',
           is_active: true,
           last_login: new Date().toISOString(),
           created_at: new Date().toISOString(),
@@ -71,8 +70,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       } else {
         console.log('No session ID found in cookies');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking admin auth status:', error);
+      setError('Failed to check authentication status. Please try again.');
     } finally {
       setLoading(false);
       console.log('Finished checking admin auth status');
@@ -80,16 +80,18 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
+    clearError();
+    
     try {
       console.log('Attempting admin login for:', email);
       // Simplified authentication - just check credentials
       if (email === 'admin@learnvow.com' && password === 'admin123') {
         // Mock user data for successful login
-        const mockUserData = {
+        const mockUserData: AdminUser = {
           id: 1,
           email: 'admin@learnvow.com',
           full_name: 'Administrator',
-          role: 'admin' as 'admin' | 'editor' | 'viewer',
+          role: 'admin',
           is_active: true,
           last_login: new Date().toISOString(),
           created_at: new Date().toISOString(),
@@ -111,15 +113,21 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         
         return { success: true };
       } else {
-        return { success: false, error: 'Invalid credentials' };
+        const errorMsg = 'Invalid credentials';
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Admin login error:', error);
-      return { success: false, error: 'An error occurred during login' };
+      const errorMsg = 'An error occurred during login';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
     }
   };
 
   const logout = async () => {
+    clearError();
+    
     try {
       console.log('Logging out admin user');
       // Clear session cookie
@@ -131,8 +139,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       
       // Redirect to login page
       router.push('/admin/login');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Admin logout error:', error);
+      setError('Failed to logout. Please try again.');
     }
   };
 
@@ -157,7 +166,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     isAuthenticated,
     login,
     logout,
-    hasPermission
+    hasPermission,
+    error,
+    clearError
   };
 
   return (
