@@ -5,26 +5,39 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
   signUp: (email: string, password: string) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
   loading: boolean;
-};
+  error: string | null;
+  clearError: () => void;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const clearError = () => {
+    setError(null);
+  };
 
   useEffect(() => {
     // Check active session
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
-      setLoading(false);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user || null);
+      } catch (error: any) {
+        console.error('Error getting session:', error);
+        setError('Failed to load authentication session. Please try again.');
+      } finally {
+        setLoading(false);
+      }
       
       // Listen for auth changes
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -41,15 +54,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    return await supabase.auth.signUp({ email, password });
+    clearError();
+    
+    try {
+      const result = await supabase.auth.signUp({ email, password });
+      if (result.error) {
+        setError(result.error.message);
+        throw result.error;
+      }
+      return result;
+    } catch (error: any) {
+      console.error('Error signing up:', error);
+      setError('Failed to sign up. Please try again.');
+      throw error;
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    return await supabase.auth.signInWithPassword({ email, password });
+    clearError();
+    
+    try {
+      const result = await supabase.auth.signInWithPassword({ email, password });
+      if (result.error) {
+        setError(result.error.message);
+        throw result.error;
+      }
+      return result;
+    } catch (error: any) {
+      console.error('Error signing in:', error);
+      setError('Failed to sign in. Please check your credentials and try again.');
+      throw error;
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    clearError();
+    
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setError(error.message);
+        throw error;
+      }
+    } catch (error: any) {
+      console.error('Error signing out:', error);
+      setError('Failed to sign out. Please try again.');
+      throw error;
+    }
   };
 
   const value = {
@@ -57,7 +108,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp,
     signIn,
     signOut,
-    loading
+    loading,
+    error,
+    clearError
   };
 
   return (
@@ -76,7 +129,9 @@ export function useAuth() {
       signUp: async () => {},
       signIn: async () => {},
       signOut: async () => {},
-      loading: true
+      loading: true,
+      error: null,
+      clearError: () => {}
     };
   }
   return context;
