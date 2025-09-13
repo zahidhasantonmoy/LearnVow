@@ -4,27 +4,18 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
-
-interface Bookmark {
-  id: number;
-  user_id: string;
-  content_id: number;
-  page_number: number;
-  note: string;
-  created_at: string;
-  updated_at: string;
-  content_title: string;
-  content_cover_url: string;
-}
+import { Bookmark } from '@/types';
 
 interface BookmarkContextType {
   bookmarks: Bookmark[];
   loading: boolean;
+  error: string | null;
   addBookmark: (contentId: number, pageNumber: number, note?: string) => Promise<void>;
   updateBookmark: (bookmarkId: number, note: string) => Promise<void>;
   removeBookmark: (bookmarkId: number) => Promise<void>;
   getBookmarksForContent: (contentId: number) => Bookmark[];
   refreshBookmarks: () => Promise<void>;
+  clearError: () => void;
 }
 
 const BookmarkContext = createContext<BookmarkContextType | undefined>(undefined);
@@ -32,9 +23,14 @@ const BookmarkContext = createContext<BookmarkContextType | undefined>(undefined
 export function BookmarkProvider({ children }: { children: ReactNode }) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   // Use optional chaining to handle cases when auth context is not available
   const authContext = useAuth();
   const user = authContext?.user;
+
+  const clearError = () => {
+    setError(null);
+  };
 
   useEffect(() => {
     if (user) {
@@ -49,6 +45,8 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     
     setLoading(true);
+    clearError();
+    
     try {
       const { data, error } = await supabase
         .from('bookmarks')
@@ -66,11 +64,12 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
         ...bookmark,
         content_title: bookmark.content?.title || 'Unknown Book',
         content_cover_url: bookmark.content?.cover_url || ''
-      }));
+      })) as Bookmark[];
 
       setBookmarks(formattedBookmarks);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching bookmarks:', error);
+      setError('Failed to load bookmarks. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -78,6 +77,8 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
 
   const addBookmark = async (contentId: number, pageNumber: number, note = '') => {
     if (!user) return;
+    
+    clearError();
     
     try {
       const { data, error } = await supabase
@@ -101,15 +102,19 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
         ...data,
         content_title: data.content?.title || 'Unknown Book',
         content_cover_url: data.content?.cover_url || ''
-      };
+      } as Bookmark;
 
       setBookmarks(prev => [formattedBookmark, ...prev]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding bookmark:', error);
+      setError('Failed to add bookmark. Please try again.');
+      throw error;
     }
   };
 
   const updateBookmark = async (bookmarkId: number, note: string) => {
+    clearError();
+    
     try {
       const { data, error } = await supabase
         .from('bookmarks')
@@ -131,12 +136,16 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
             : bookmark
         )
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating bookmark:', error);
+      setError('Failed to update bookmark. Please try again.');
+      throw error;
     }
   };
 
   const removeBookmark = async (bookmarkId: number) => {
+    clearError();
+    
     try {
       const { error } = await supabase
         .from('bookmarks')
@@ -147,8 +156,10 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
 
       // Remove from bookmarks list
       setBookmarks(prev => prev.filter(bookmark => bookmark.id !== bookmarkId));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing bookmark:', error);
+      setError('Failed to remove bookmark. Please try again.');
+      throw error;
     }
   };
 
@@ -163,11 +174,13 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
   const value = {
     bookmarks,
     loading,
+    error,
     addBookmark,
     updateBookmark,
     removeBookmark,
     getBookmarksForContent,
-    refreshBookmarks
+    refreshBookmarks,
+    clearError
   };
 
   return (
@@ -184,11 +197,13 @@ export function useBookmarks() {
     return {
       bookmarks: [],
       loading: false,
+      error: null,
       addBookmark: async () => {},
       updateBookmark: async () => {},
       removeBookmark: async () => {},
       getBookmarksForContent: () => [],
-      refreshBookmarks: async () => {}
+      refreshBookmarks: async () => {},
+      clearError: () => {}
     };
   }
   return context;
